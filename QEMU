@@ -1,0 +1,32 @@
+#!/bin/sh
+# NVMC's default Qemu parameters
+QEMU="qemu-system-x86_64"
+CPUS="`cat CPUS`"
+MEMS="`cat MEMS`G"
+# Ports
+SLOT="`cat SLOT`"
+SSH="`expr $SLOT + 2200`"
+LOG="qemu.log"
+VNC="qemu.vnc"
+MON="qemu.mon"
+OPTS=""
+test -f OPTS && OPTS="`cat OPTS`"
+
+$QEMU -name nvmc$SLOT \
+	-machine pc,accel=kvm,dump-guest-core=off -cpu host \
+	-m $MEMS \
+	-smp $CPUS,sockets=2 \
+	-no-user-config -nodefaults \
+	-monitor unix:$MON,server,nowait \
+	-rtc base=utc \
+	-boot strict=on \
+	-drive file=disk,format=qcow2,if=virtio,id=disk,cache=none,media=disk \
+	-vga cirrus \
+	-vnc unix:$VNC \
+	-netdev user,id=net0,hostfwd=:127.0.0.1:$SSH-:22 \
+	-device virtio-net-pci,netdev=net0 \
+	-device virtio-balloon-pci,id=balloon0 \
+	-device piix3-usb-uhci,id=usb0 \
+	-device usb-tablet,id=input0 \
+	$OPTS $* \
+	-msg timestamp=on 1>$LOG 2>&1

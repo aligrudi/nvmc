@@ -1,0 +1,71 @@
+NVMC: NEAT VM CLUSTER
+=====================
+
+Neat VM Cluster (NVMC; pronounced nivmec) is a collection of shell
+scripts for managing KVM virtual machines on multiple host nodes.  It
+uses Qemu directly and stores host and VM configurations in the file
+system.
+
+DIRECTORY STRUCTURE
+===================
+
+NVMC uses the following directories on the master node:
+
++ NCDIR: NVMC's base directory (/var/nc).
++ NCDIR/hosts: contains a directory for each host.
++ NCDIR/vms: contains a directory for each VM.
+
+The directory NCDIR/hosts/HOST stores the details of host node HOST:
++ ADDR: the address of the host.
++ CPUS: the number of available CPUS.
++ MEMS: available memory in GB.
+
+The directory NCDIR/vms/VM stores the details of VM:
++ CPUS: the number of CPUS assigned to VM.
++ MEMS: the amount of VM's memory in GB.
++ DISK: the size of VM's disk in GB.
++ HOST: the host on which the VM is running.
++ USER: the UID of VM owner.
++ INIT: VM initialization script (executed when creating the VM).
++ ONCE: commands executed only once (e.g. for resizing disk; optional).
++ QEMU: Qemu invocation script (optional; NCDIR/QEMU is used by default).
++ OPTS: extra Qemu arguments.
++ SLOT: the slot assigned to the VM (created by nc push).
++ disk: VM's disk image in QCOW2 format (created on the host node).
+
+EXECUTABLES
+===========
+
+The main programs:
++ nc: the main program.
++ ncvm: executed on host nodes for managing VMs.
++ nclogin: for user login.
+
+Helpers:
++ nc_mkuser.sh: make a VM user.
++ nc_mkvm.sh: make a VM.
++ nc_backup.sh: create a backup of NCDIR.
+
+For VM users:
++ users/nctun.sh: create a SSH/VNC tunnel to a VM.
++ users/nctun.cmd: create a VNC tunnel to a VM for windows.
++ users/vmdisk.sh: extend partition after enlarging VM disk.
+
+SETTING UP
+==========
+
+NVMC is executed on a master node to manage virtual machines on
+multiple host nodes.  The root user of the master node should be able
+to log into host nodes using its public key.  On host nodes Qemu/KVM
+and socat should be available.  Host nodes can be on a private
+network, visible only to the master node, through which the users may
+connect to the VMs.
+
++ Install NVMC on the master node (make install)
++ Add a directory in NCDIR/hosts/ for each host, containing ADDR, CPUS, MEMS.
++ Install NVMC on host nodes (nc hostinit)
++ Create VM users (nc_mkuser.sh)
++ Create VMs (nc_mkvm.sh)
+
+The script nc_mkvm.sh assumes that disk images are stored in
+NCDIR/imgs directory on host nodes.

@@ -1,0 +1,124 @@
+#!/bin/sh
+# Manage VMs on hosts
+
+if test "$#" -lt "2"; then
+	echo "Usage: $0 vm_directory command [options]"
+	exit
+fi
+vm="$1"
+sock="./qemu.mon"
+if test ! -d "$vm"; then
+	echo "ncvm: directory $vm does not exist"
+	return 1
+fi
+cd "$vm"
+
+vminit() {
+	if test ! -x INIT; then
+		echo "ncvm: cannot execute $vm/INIT"
+		return 1
+	fi
+	if ! ./INIT; then
+		echo "ncvm: $vm/INIT failed"
+		return 1
+	fi
+}
+
+vmexec() {
+	if test -f PID && kill -0 "`cat PID`" 2>/dev/null; then
+		echo "nvcm: VM $vm is already running"
+		return 1
+	fi
+	if test -x ONCE; then
+		./ONCE
+		rm ONCE
+	fi
+	qemu="./QEMU"
+	if test ! -x QEMU; then
+		qemu="/var/nc/QEMU"
+	fi
+	shift 2
+	$qemu $* &
+	pid="$!"
+	echo $pid >PID
+	wait $pid && rm PID
+}
+
+vmkill() {
+	if test -f PID; then
+		kill `cat PID`
+	fi
+}
+
+vmstat() {
+	if test -f PID && kill -0 "`cat PID`" 2>/dev/null; then
+		stat=`echo "info status" | vmsend | grep "status:" | sed 's/.*: *//'`
+		if test -z "$stat"; then
+			echo "pending"
+		else
+			echo "$stat"
+		fi
+	else
+		echo "off"
+	fi
+}
+
+vmqlog() {
+	if test -f qemu.log; then
+		cat qemu.log
+	fi
+}
+
+vmsend() {
+	socat -T1 - $sock | tail -n +2 | head -n -1
+}
+
+vmsend_test() {
+	lns="`echo $* | vmsend | tee .nvmc.log | wc -l`"
+	cat .nvmc.log
+	rm .nvmc.log
+	test "$lns" -le "1"
+}
+
+# Main Commands
+case "$2" in
+	init)
+		vminit $* || exit 1
+		;;
+	exec)
+		vmexec $* || exit 1
+		;;
+	kill)
+		vmkill $* || exit 1
+		;;
+	stat)
+		vmstat $* || exit 1
+		;;
+	qlog)
+		vmqlog $* || exit 1
+		;;
+	send)
+		vmsend $* || exit 1
+		;;
+	quit)
+		echo "quit" | vmsend || exit 1
+		;;
+	poff)
+		echo "system_powerdown" | vmsend || exit 1
+		;;
+	reboot)
+		echo "system_reset" | vmsend || exit 1
+		;;
+	stop)
+		echo "stop $3" | vmsend || exit 1
+		;;
+	cont)
+		echo "cont $3" | vmsend || exit 1
+		;;
+	save)
+		vmsend_test savevm $3 || exit 1
+		;;
+	*)
+		echo "Unknown command $2"
+		;;
+esac

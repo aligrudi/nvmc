@@ -1,0 +1,37 @@
+#!/bin/sh
+# NVMC user login shell
+vm=""
+cmd="ncvnc"
+
+readargs() {
+	if test "$1" = "ncvnc"; then
+		cmd="ncvnc"
+		vm="$2"
+		return 0
+	fi
+	if test "$1" = "ncssh"; then
+		cmd="ncssh"
+		vm="$2"
+		return 0
+	fi
+	if test "$1" = "passwd"; then
+		passwd
+		exit
+	fi
+	vm="$1"
+}
+
+readargs $2
+
+if test -z "$vm"; then
+	echo "VM name not specified."
+	exit 1
+fi
+
+if /var/nc/$cmd $vm $HOME/$vm.vnc; then
+	echo "Forwarding connections to VM $vm."
+	read ln
+else
+	echo "Failed to set up connection forwarding."
+	exit 1
+fi
