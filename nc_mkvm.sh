@@ -98,9 +98,6 @@ if ! id $user >/dev/null 2>&1; then
 	echo "Unknown user <$user>"
 	exit 1
 fi
-if test "$temp" != "ubuntu16" -a "$temp" != "ubuntu18" -a "$temp" != "windows10"; then
-	echo "Unknown template $temp"
-fi
 
 # Create VM directory and files
 mkdir -p $vm
@@ -114,7 +111,7 @@ test "$temp" = "windows10" && echo 30 >$vm/DISK
 
 # Adding Qemu options
 for x in $iso; do
-	echo "-drive file=$HSIMG/$x,format=raw,readonly=on,media=cdrom" >>$vm/OPTS
+	echo "-drive file=$NCDIR/imgs/$x,format=raw,readonly=on,media=cdrom" >>$vm/OPTS
 done
 for x in $gpu; do
 	test "$x" = "1" && echo "-device vfio-pci,host=0b:00.1 -device vfio-pci,host=0b:00.2 -device vfio-pci,host=0b:00.0 -device vfio-pci,host=0b:00.3" >>$vm/OPTS
@@ -124,7 +121,7 @@ done
 # Create INIT script
 echo "#!/bin/sh" >$vm/INIT
 echo "test -f disk && exit" >>$vm/INIT
-echo "cp /var/nc/imgs/$temp.img disk" >>$vm/INIT
+echo "cp $NCDIR/imgs/$temp.img disk" >>$vm/INIT
 chmod +x $vm/INIT
 if test -n "$disk"; then
 	if test "$disk" -gt "`cat $vm/DISK`"; then
