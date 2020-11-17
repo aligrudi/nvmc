@@ -71,7 +71,7 @@ while test "$#" -ge 1; do
 			shift && test "$#" -ge 1 && shift
 			;;
 		-g)
-			gpu="$2"
+			gpu="$gpu $2"
 			shift && test "$#" -ge 1 && shift
 			;;
 		*)
@@ -113,10 +113,12 @@ echo "10" >$vm/DISK
 test "$temp" = "windows10" && echo 30 >$vm/DISK
 
 # Adding Qemu options
-test "$gpu" = "1" && echo "-device vfio-pci,host=0b:00.1 -device vfio-pci,host=0b:00.2 -device vfio-pci,host=0b:00.0 -device vfio-pci,host=0b:00.3" >>$vm/OPTS
-test "$gpu" = "2" && echo "-device vfio-pci,host=84:00.1 -device vfio-pci,host=84:00.2 -device vfio-pci,host=84:00.0 -device vfio-pci,host=84:00.3" >>$vm/OPTS
 for x in $iso; do
 	echo "-drive file=$HSIMG/$x,format=raw,readonly=on,media=cdrom" >>$vm/OPTS
+done
+for x in $gpu; do
+	test "$x" = "1" && echo "-device vfio-pci,host=0b:00.1 -device vfio-pci,host=0b:00.2 -device vfio-pci,host=0b:00.0 -device vfio-pci,host=0b:00.3" >>$vm/OPTS
+	test "$x" = "2" && echo "-device vfio-pci,host=84:00.1 -device vfio-pci,host=84:00.2 -device vfio-pci,host=84:00.0 -device vfio-pci,host=84:00.3" >>$vm/OPTS
 done
 
 # Create INIT script
