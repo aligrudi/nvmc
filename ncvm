@@ -41,13 +41,12 @@ vmexec() {
 		qemu="/var/nc/QEMU"
 	fi
 	shift 2
-	# Switch to nvmc user
+	# Check if nvmc user is available
 	if id -u nvmc 1>/dev/null 2>&1; then
 		chown -R nvmc:nvmc .
-		su nvmc -c "$qemu $*" &
-	else
-		$qemu $* &
+		runas="-runas nvmc"
 	fi
+	$qemu $runas $* &
 	pid="$!"
 	echo $pid >PID
 	wait $pid && rm PID
