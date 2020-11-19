@@ -5,13 +5,18 @@ cmd="ncvnc"
 
 readargs() {
 	if test "$1" = "ncvnc"; then
-		cmd="ncvnc"
+		cmd="ncuser vncs $2 $HOME/$vm.vnc"
 		vm="$2"
 		return 0
 	fi
 	if test "$1" = "ncssh"; then
-		cmd="ncssh"
+		cmd="ncuser sshs $2 $HOME/$vm.vnc"
 		vm="$2"
+		return 0
+	fi
+	if test "$1" = "ncuser"; then
+		cmd="ncuser $2 $3"
+		vm="$3"
 		return 0
 	fi
 	if test "$1" = "passwd"; then
@@ -28,7 +33,7 @@ if test -z "$vm"; then
 	exit 1
 fi
 
-if /var/nc/$cmd $vm $HOME/$vm.vnc; then
+if /var/nc/$cmd $HOME/$vm.vnc; then
 	echo "Forwarding connections to VM $vm."
 	read ln
 else

@@ -3,18 +3,16 @@ CFLAGS = -Wall -O2
 LDFLAGS =
 BINDIR = /bin
 
-all: nctun
+all: ncuser
 
 .c.o:
 	$(CC) -c $(CFLAGS) $<
-nctun: nctun.o
-	$(CC) -o $@ nctun.o $(LDFLAGS)
-install: nctun
+ncuser: ncuser.o
+	$(CC) -o $@ ncuser.o $(LDFLAGS)
+install: ncuser
 	@mkdir -p /var/nc
 	@cp QEMU nc ncvm nclogin /var/nc/
-	@cp nctun /var/nc/ncssh
-	@cp nctun /var/nc/ncvnc
-	@chmod +s /var/nc/ncvnc /var/nc/ncssh
+	@chmod +s /var/nc/ncuser
 	@cp nc nc_*.sh $(BINDIR)
 clean:
-	rm -f *.o nctun
+	rm -f *.o ncuser

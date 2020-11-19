@@ -43,11 +43,11 @@ while test "$#" -ge 1; do
 			shift && test "$#" -ge 1 && shift
 			;;
 		-ssh)
-			cmd="ncssh"
+			cmd="ncuser sshs"
 			shift
 			;;
 		-vnc)
-			cmd="ncvnc"
+			cmd="ncuser vncs"
 			shift
 			;;
 		-passwd)
