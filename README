@@ -30,6 +30,7 @@ The directory NCDIR/vms/VM stores the details of VM:
 + ONCE: commands executed only once (e.g. for resizing disk; optional).
 + QEMU: Qemu invocation script (optional; NCDIR/QEMU is used by default).
 + OPTS: extra Qemu arguments.
++ EMAC: MAC address for bridged networking (optional).
 + SLOT: the slot assigned to the VM (created by nc push).
 + disk: VM's disk image in QCOW2 format (created on the host node).
 
@@ -64,8 +65,16 @@ connect to the VMs.
 + Install NVMC on the master node (make install)
 + Add a directory in NCDIR/hosts/ for each host, containing ADDR, CPUS, MEMS.
 + Install NVMC on host nodes (nc hostinit)
-+ Create VM users (nc_mkuser.sh)
-+ Create VMs (nc_mkvm.sh)
++ Create VM users (use nc_mkuser.sh)
++ Create VMs (use nc_mkvm.sh or create the necessary files in NCDIR/vms/NAME)
 
 The script nc_mkvm.sh assumes that disk images are stored in
-NCDIR/imgs directory on host nodes.
+NCDIR/imgs directory on host nodes.  Note that after changing the
+files in a VM directory of the master node, nc push command should be
+used to update the VM on its host node.
+
+If the EMAC file is missing or empty in a VM directory, NVMC uses
+Qemu's user networking for that VM.  Otherwise, NVMC uses bridged
+networking with the provided MAC address.  In thas case, the bridge
+br0 should be set up properly and the file /etc/qemu/bridge.conf
+should contain "allow br0".
