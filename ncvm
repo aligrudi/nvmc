@@ -1,6 +1,7 @@
 #!/bin/sh
 # Manage VMs on hosts
 
+# All commands have at least two arguments
 if test "$#" -lt "2"; then
 	echo "Usage: $0 vm_directory command [options]"
 	exit
@@ -11,6 +12,8 @@ if test ! -d "$vm"; then
 	echo "ncvm: directory $vm does not exist"
 	return 1
 fi
+
+# Go to VM directory
 cd "$vm"
 
 vminit() {
@@ -38,7 +41,13 @@ vmexec() {
 		qemu="/var/nc/QEMU"
 	fi
 	shift 2
-	$qemu $* &
+	# Switch to nvmc user
+	if id -u nvmc 1>/dev/null 2>&1; then
+		chown -R nvmc:nvmc .
+		su nvmc -c "$qemu $*" &
+	else
+		$qemu $* &
+	fi
 	pid="$!"
 	echo $pid >PID
 	wait $pid && rm PID

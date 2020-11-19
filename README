@@ -1,7 +1,7 @@
 NVMC: NEAT VM CLUSTER
 =====================
 
-Neat VM Cluster (NVMC; pronounced nivmec) is a collection of shell
+Neat VM Cluster (NVMC; pronounced nevuc) is a collection of shell
 scripts for managing KVM virtual machines on multiple host nodes.  It
 uses Qemu directly and stores host and VM configurations in the file
 system.
@@ -57,7 +57,7 @@ SETTING UP
 
 NVMC is executed on a master node to manage virtual machines on
 multiple host nodes.  The root user of the master node should be able
-to log into host nodes using its public key.  On host nodes Qemu/KVM
+to log into host nodes using its public key.  On host nodes, Qemu/KVM
 and socat should be available.  Host nodes can be on a private
 network, visible only to the master node, through which the users may
 connect to the VMs.
@@ -75,6 +75,16 @@ used to update the VM on its host node.
 
 If the EMAC file is missing or empty in a VM directory, NVMC uses
 Qemu's user networking for that VM.  Otherwise, NVMC uses bridged
-networking with the provided MAC address.  In thas case, the bridge
+networking with the provided MAC address.  In that case, the bridge
 br0 should be set up properly and the file /etc/qemu/bridge.conf
 should contain "allow br0".
+
+NVMC USER
+=========
+
+On host nodes, NVMC uses the root user to execute Qemu, unless nvmc
+user exists.  To create it, execute the following commands on each
+host node.
+
+  # groupadd nvmc
+  # useradd -g nvmc -G kvm -N nvmc

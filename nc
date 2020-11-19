@@ -136,7 +136,7 @@ ncpush() {
 	addr="`cat $HSDIR/$host/ADDR`"
 	if $SCP -r $VMDIR/$vm $addr:$VMDIR/; then
 		if test ! -f $VMDIR/$vm/STAT; then
-			if $SSH $addr $HSBIN/ncvm $VMDIR/$vm init; then
+			if ncvm init $vm; then
 				echo "OK" >$VMDIR/$vm/STAT
 			else
 				echo "nc: cannot initialize VM $vm on $host"
