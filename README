@@ -20,7 +20,7 @@ The directory NCDIR/hosts/HOST stores the details of host node HOST:
 + CPUS: the number of available CPUS.
 + MEMS: available memory in GB.
 
-The directory NCDIR/vms/VM stores the details of VM:
+The directory NCDIR/vms/VM stores the details of virtual machine VM:
 + CPUS: the number of CPUS assigned to VM.
 + MEMS: the amount of VM's memory in GB.
 + DISK: the size of VM's disk in GB.
@@ -38,9 +38,9 @@ EXECUTABLES
 ===========
 
 The main programs:
-+ nc: the main program.
++ nc: the main program; shows available commands, if executed without arguments.
 + ncvm: executed on host nodes for managing VMs.
-+ nclogin: for user login.
++ nclogin: for VM user login.
 
 Helpers:
 + nc_mkuser.sh: make a VM user.
@@ -59,8 +59,8 @@ NVMC is executed on a master node to manage virtual machines on
 multiple host nodes.  The root user of the master node should be able
 to log into host nodes using its public key.  On host nodes, Qemu/KVM
 and socat should be available.  Host nodes can be on a private
-network, visible only to the master node, through which the users may
-connect to the VMs.
+network, visible only to the master node, through which users may
+connect to VMs.
 
 + Install NVMC on the master node (make install)
 + Add a directory in NCDIR/hosts/ for each host, containing ADDR, CPUS, MEMS.
@@ -79,12 +79,8 @@ networking with the provided MAC address.  In that case, the bridge
 br0 should be set up properly and the file /etc/qemu/bridge.conf
 should contain "allow br0".
 
-NVMC USER
-=========
-
-On host nodes, NVMC uses the root user to execute Qemu, unless nvmc
-user exists.  To create it, execute the following commands on each
-host node.
+On host nodes, NVMC executes Qemu as root, unless user nvmc exists.
+To create it, execute the following commands on each host node.
 
   # groupadd nvmc
   # useradd -g nvmc -G kvm -N nvmc
