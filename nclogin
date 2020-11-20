@@ -5,12 +5,12 @@ cmd="ncvnc"
 
 readargs() {
 	if test "$1" = "ncvnc"; then
-		cmd="ncuser vncs $2 $HOME/$vm.vnc"
+		cmd="ncuser vncs $2 $HOME/$2.vnc"
 		vm="$2"
 		return 0
 	fi
 	if test "$1" = "ncssh"; then
-		cmd="ncuser sshs $2 $HOME/$vm.vnc"
+		cmd="ncuser sshs $2 $HOME/$2.vnc"
 		vm="$2"
 		return 0
 	fi
