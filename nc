@@ -262,7 +262,7 @@ ncsshs() {
 	addr="`cat $HSDIR/$host/ADDR`"
 	slot="`cat $VMDIR/$vm/SLOT`"
 	port="`expr 2200 + $slot`"
-	$SSH -f -N -L $sock:127.0.0.1:$port $addr sleep 1d
+	$SSH -f -L $sock:127.0.0.1:$port $addr sleep 12h
 	chmod o+rw $sock
 }
 
@@ -284,7 +284,7 @@ ncvncs() {
 	host="`cat $VMDIR/$vm/HOST`"
 	addr="`cat $HSDIR/$host/ADDR`"
 	slot="`cat $VMDIR/$vm/SLOT`"
-	$SSH -f -N -L $sock:$VMDIR/$vm/qemu.vnc $addr sleep 1d
+	$SSH -f -L $sock:$VMDIR/$vm/qemu.vnc $addr sleep 3h
 	sleep .5
 	chmod o+rw $sock
 }
