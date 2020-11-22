@@ -1,7 +1,7 @@
 CC = cc
 CFLAGS = -Wall -O2
 LDFLAGS =
-BINDIR = /bin
+BINDIR = /usr/bin
 
 all: ncuser
 
@@ -10,9 +10,11 @@ all: ncuser
 ncuser: ncuser.o
 	$(CC) -o $@ ncuser.o $(LDFLAGS)
 install: ncuser
+	@echo "Copying files to /var/nc"
 	@mkdir -p /var/nc
 	@cp QEMU nc ncvm nclogin /var/nc/
 	@chmod +s /var/nc/ncuser
+	@echo "Copying binaries"
 	@cp nc nc_*.sh $(BINDIR)
 clean:
 	rm -f *.o ncuser
