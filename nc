@@ -50,13 +50,15 @@ ncstat() {
 			disk="0"
 			cpus="`cat $vm/CPUS`"
 			mems="`cat $vm/MEMS`"
+			link="enabled"
+			test -f $vm/USER && test "`cat $vm/USER`" -lt "0" && link="disabled"
 			test -f $vm/DISK && disk="`cat $vm/DISK`"
 			test -f $vm/STAT && stat="`ncvm stat $vmname`"
 			test -f $vm/SAVE && stat="saved"
 			test -f $vm/HOST && host="`cat $vm/HOST`"
 			test -f $vm/SLOT && slot="`cat $vm/SLOT`"
-			printf "%03d  %-16s  %02d:%03d:%03d  %-8s  %-16s\\n" \
-				"$slot" "`basename $vm`" "$cpus" "$mems" "$disk" "$host" "$stat"
+			printf "%03d  %-16s  %02d:%03d:%03d  %-8s  %-9s  %-8s\\n" \
+				"$slot" "`basename $vm`" "$cpus" "$mems" "$disk" "$host" "$stat" "$link"
 		fi
 	done
 }
@@ -309,6 +311,21 @@ ncsave() {
 	echo nvmc0 >$VMDIR/$vm/SAVE
 }
 
+ncuser() {
+	if test "$#" -lt "3"; then
+		echo "usage: nc user VM +/-"
+		return 1
+	fi
+	vm="$2"
+	ncvmcheck $vm || return 1
+	user="0"
+	test -f $VMDIR/$vm/USER && user="`cat $VMDIR/$vm/USER | tr -d -`"
+	test "$3" = "-" && user="-$user"
+	if test "$3" = "-" -o "$3" = "+"; then
+		echo $user >$VMDIR/$vm/USER
+	fi
+}
+
 echo "`date '+%Y:%m:%d %T'`	$*" >>$NCDIR/nc.log
 
 # Main commands
@@ -352,6 +369,9 @@ case "$1" in
 	save)
 		ncsave $* || exit 1
 		;;
+	user)
+		ncuser $* || exit 1
+		;;
 	stop|cont|quit|reboot|send|kill|poff|qlog)
 		ncvm $* || exit 1
 		;;
@@ -368,6 +388,7 @@ case "$1" in
 		echo "  vncs      forward VNC connections to a VM"
 		echo "  sshs      forward SSH connections to a VM"
 		echo "  save      save VM state and stop VM"
+		echo "  user      enable/disable user connections to a VM"
 		echo "  hostinit  install or update NVMC on host nodes"
 		echo
 		echo "Available commands for managing VMs:"
