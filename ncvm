@@ -60,7 +60,7 @@ vmkill() {
 
 vmstat() {
 	if test -f PID && kill -0 "`cat PID`" 2>/dev/null; then
-		stat=`echo "info status" | vmsend | grep "status:" | sed 's/.*: *//'`
+		stat=`echo "info status" | vmsend | grep "status:" | sed 's/.*: *//' | tr -d '\r'`
 		if test -z "$stat"; then
 			echo "pending"
 		else
