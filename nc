@@ -47,13 +47,16 @@ ncstat() {
 			stat="-"
 			host="-"
 			slot="-"
+			disk="0"
 			cpus="`cat $vm/CPUS`"
 			mems="`cat $vm/MEMS`"
+			test -f $vm/DISK && disk="`cat $vm/DISK`"
 			test -f $vm/STAT && stat="`ncvm stat $vmname`"
 			test -f $vm/SAVE && stat="saved"
 			test -f $vm/HOST && host="`cat $vm/HOST`"
 			test -f $vm/SLOT && slot="`cat $vm/SLOT`"
-			echo "`basename $vm`/$slot	$cpus	$mems	$host	$stat"
+			printf "%03d  %-16s  %02d:%03d:%03d  %-8s  %-16s\\n" \
+				"$slot" "`basename $vm`" "$cpus" "$mems" "$disk" "$host" "$stat"
 		fi
 	done
 }
@@ -292,7 +295,7 @@ ncvncs() {
 ncsave() {
 	vm="$2"
 	ncvmcheck $vm || return 1
-	if test "`ncvm stat $vm`" = "running"; then
+	if test "`ncvm stat $vm`" != "running"; then
 		echo "nc: VM $vm should be running to save"
 		return 1
 	fi
@@ -316,7 +319,7 @@ case "$1" in
 	hostinit)
 		nchostinit $* || exit 1
 		;;
-	stat)
+	stat|vm)
 		ncstat $* || exit 1
 		;;
 	push)
