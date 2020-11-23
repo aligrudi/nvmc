@@ -63,6 +63,10 @@ ncstat() {
 	done
 }
 
+ncstat_colour() {
+	ncstat $* | sed "s/disabled/[33m&[0m/; s/running/[32m&[0m/;"
+}
+
 nchost_usedcpus() {
 	host="$1"
 	cnt="0"
@@ -337,7 +341,11 @@ case "$1" in
 		nchostinit $* || exit 1
 		;;
 	stat|vm)
-		ncstat $* || exit 1
+		if test -t 1; then
+			ncstat_colour $* || exit 1
+		else
+			ncstat $* || exit 1
+		fi
 		;;
 	push)
 		ncpush $* || exit 1
