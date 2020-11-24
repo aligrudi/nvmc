@@ -45,6 +45,7 @@ vmexec() {
 	if id -u nvmc 1>/dev/null 2>&1; then
 		chown -R nvmc:nvmc .
 		runas="-runas nvmc"
+		ulimit -l unlimited
 	fi
 	$qemu $runas $* &
 	pid="$!"
