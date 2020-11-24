@@ -315,6 +315,36 @@ ncsave() {
 	echo nvmc0 >$VMDIR/$vm/SAVE
 }
 
+ncmove() {
+	vm="$2"
+	host2="$3"
+	ncvmcheck $vm || return 1
+	if test -z "$host2" || test ! -f "$HSDIR/$host2/ADDR"; then
+		echo "nc: destination host is missing"
+		return 1
+	fi
+	host1="`cat $VMDIR/$vm/HOST`"
+	addr1="`cat $HSDIR/$host1/ADDR`"
+	addr2="`cat $HSDIR/$host2/ADDR`"
+	if test "$host1" = "$host2"; then
+		echo "nc: source and destination hosts are the same"
+		return 1
+	fi
+	stat="`ncvm stat $vm`"
+	if test "$stat" != "off" -a "$stat" != "saved"; then
+		echo "nc: VM should be off or saved to migrate"
+		return 1
+	fi
+	$SSH $addr1 rm -f $VMDIR/$vm/qemu.vnc
+	if ! $SSH $addr1 $SCP -r $VMDIR/$vm/ $addr2:$VMDIR; then
+		echo "nc: failed to copy VM files to HOST $host2"
+		return 1
+	fi
+	echo "$host2" >$VMDIR/$vm/HOST
+	$SCP $VMDIR/$vm/HOST $addr1:$VMDIR/$vm/
+	$SCP $VMDIR/$vm/HOST $addr2:$VMDIR/$vm/
+}
+
 ncuser() {
 	if test "$#" -lt "3"; then
 		echo "usage: nc user VM +/-"
@@ -377,6 +407,9 @@ case "$1" in
 	save)
 		ncsave $* || exit 1
 		;;
+	move)
+		ncmove $* || exit 1
+		;;
 	user)
 		ncuser $* || exit 1
 		;;
@@ -396,6 +429,7 @@ case "$1" in
 		echo "  vncs      forward VNC connections to a VM"
 		echo "  sshs      forward SSH connections to a VM"
 		echo "  save      save VM state and stop VM"
+		echo "  move      migrate VM to a host"
 		echo "  user      enable/disable user connections to a VM"
 		echo "  hostinit  install or update NVMC on host nodes"
 		echo
