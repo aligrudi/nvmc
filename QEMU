@@ -16,7 +16,7 @@ test -f OPTS && OPTS="`cat OPTS`"
 test -f EMAC && MAC="`cat EMAC`"
 test -n "$MAC" && NET="-netdev bridge,id=net1,br=br0 -device virtio-net-pci,netdev=net1,mac=$MAC"
 
-$QEMU -name nvmc$SLOT \
+$QEMU -name nvmc`printf '%03d' $SLOT` \
 	-machine pc,accel=kvm,dump-guest-core=off -cpu host \
 	-m $MEMS \
 	-smp $CPUS,sockets=2 \
