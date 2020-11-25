@@ -41,6 +41,19 @@ nchostinit() {
 }
 
 ncstat() {
+	shift 1
+	while test "$#" -ge 1; do
+		case "$1" in
+			-l)
+				loc="1"
+				;;
+			*)
+				echo "Usage: nc stat [-l]"
+				return 1
+				;;
+		esac
+		shift
+	done
 	for vm in $VMDIR/*/; do
 		if test -f $vm/CPUS -a -f $vm/MEMS; then
 			vmname="`basename $vm`"
@@ -53,7 +66,10 @@ ncstat() {
 			link="enabled"
 			test -f $vm/USER && test "`cat $vm/USER`" -lt "0" && link="disabled"
 			test -f $vm/DISK && disk="`cat $vm/DISK`"
-			test -f $vm/STAT && stat="`ncvm stat $vmname`"
+			if test -f $vm/STAT; then
+				stat="..."
+				test -z "$loc" && stat="`ncvm stat $vmname`"
+			fi
 			test -f $vm/SAVE && stat="saved"
 			test -f $vm/HOST && host="`cat $vm/HOST`"
 			test -f $vm/SLOT && slot="`cat $vm/SLOT`"
