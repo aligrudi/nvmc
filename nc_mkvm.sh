@@ -5,6 +5,7 @@
 NCDIR="/var/nc"
 VMDIR="$NCDIR/vms"
 HSDIR="$NCDIR/hosts"
+MACPT="52:54:CC:5E:%02X:%02X"
 # VM variables
 mems="1"
 cpus="1"
@@ -15,6 +16,7 @@ host="host1"
 temp="ubuntu16"
 gpu=""
 iso=""
+net=""
 
 printusage() {
 	echo "Usage: $0 options"
@@ -29,6 +31,7 @@ printusage() {
 	echo "  -t disk    disk image (blank, ubuntu16, ubuntu18, windows10, ubuntu18-cuda)"
 	echo "  -i iso     CD/DVD ISO"
 	echo "  -g gpu#    GPU number to passthrough (1, 2)"
+	echo "  -net x     NIC type (b: bridge, u: slirp)"
 }
 
 if test "$#" = "0"; then
@@ -72,6 +75,10 @@ while test "$#" -ge 1; do
 			;;
 		-g)
 			gpu="$gpu $2"
+			shift && test "$#" -ge 1 && shift
+			;;
+		-net)
+			net="$2"
 			shift && test "$#" -ge 1 && shift
 			;;
 		*)
@@ -146,3 +153,11 @@ if ! nc push $name; then
 fi
 slot="`cat $vm/SLOT`"
 echo "VM slot         $slot"
+
+# Assign a MAC address (for bridged networking)
+if test -z "$net" -o "$net" = "b"; then
+	printf "$MACPT" "`expr $slot / 256`" "`expr $slot % 256`" >$vm/EMAC
+	emac="`cat $vm/EMAC`"
+	echo "VM mac address  $emac"
+	nc push $name
+fi
