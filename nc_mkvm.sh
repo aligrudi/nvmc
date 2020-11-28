@@ -17,6 +17,7 @@ temp="ubuntu16"
 gpu=""
 iso=""
 net=""
+cln=""
 
 printusage() {
 	echo "Usage: $0 options"
@@ -32,6 +33,7 @@ printusage() {
 	echo "  -i iso     CD/DVD ISO"
 	echo "  -g gpu#    GPU number to passthrough (1, 2)"
 	echo "  -net x     NIC type (b: bridge, u: slirp)"
+	echo "  -cln x     disk image clone type (c: copy, o: overlay)"
 }
 
 if test "$#" = "0"; then
@@ -81,6 +83,10 @@ while test "$#" -ge 1; do
 			net="$2"
 			shift && test "$#" -ge 1 && shift
 			;;
+		-cln)
+			cln="$2"
+			shift && test "$#" -ge 1 && shift
+			;;
 		*)
 			printusage
 			exit 1
@@ -128,7 +134,11 @@ done
 # Create INIT script
 echo "#!/bin/sh" >$vm/INIT
 echo "test -f disk && exit" >>$vm/INIT
-echo "cp $NCDIR/imgs/$temp.img disk" >>$vm/INIT
+if test -z "$cln" -o "$cln" = "c"; then
+	echo "cp $NCDIR/imgs/$temp.img disk" >>$vm/INIT
+else
+	echo "qemu-img create -f qcow2 -b $NCDIR/imgs/$temp.img disk" >>$vm/INIT
+fi
 chmod +x $vm/INIT
 if test -n "$disk"; then
 	if test "$disk" -gt "`cat $vm/DISK`"; then
@@ -156,7 +166,7 @@ echo "VM slot         $slot"
 
 # Assign a MAC address (for bridged networking)
 if test -z "$net" -o "$net" = "b"; then
-	printf "$MACPT" "`expr $slot / 256`" "`expr $slot % 256`" >$vm/EMAC
+	printf "$MACPT\\n" "`expr $slot / 256`" "`expr $slot % 256`" >$vm/EMAC
 	emac="`cat $vm/EMAC`"
 	echo "VM mac address  $emac"
 	nc push $name
