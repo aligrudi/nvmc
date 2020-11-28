@@ -179,7 +179,7 @@ ncsize() {
 	size="$3"
 	ncvmcheck $vm || return 1
 	if test -z "$size"; then
-		echo "nc: image name is missing"
+		echo "nc: size is missing"
 		return 1
 	fi
 	if test -f $VMDIR/$vm/DISK && test "$size" -le "`cat $VMDIR/$vm/DISK`"; then
