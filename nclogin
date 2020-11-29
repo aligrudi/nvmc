@@ -1,7 +1,7 @@
 #!/bin/sh
 # NVMC user login shell
 vm=""
-cmd="ncvnc"
+cmd=""
 
 readargs() {
 	if test "$1" = "ncvnc"; then
@@ -23,13 +23,14 @@ readargs() {
 		passwd
 		exit
 	fi
+	cmd="ncuser vncs"
 	vm="$1"
 }
 
 readargs $2
 
-if test -z "$vm"; then
-	echo "VM name not specified."
+if test -z "$vm" -o -z "$cmd"; then
+	echo "Command or VM name not specified."
 	exit 1
 fi
 
