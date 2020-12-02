@@ -8,13 +8,13 @@ set /p rport="VM port (default: 22): "
 if "%rport%" equ "" set rport="22"
 
 echo Using OpenSSH to forward connections...
-ssh -N -L %lport%:%ip%:%rport% %user%@hpc.nit.ac.ir
+ssh -N -L %lport%:%addr%:%rport% %user%@hpc.nit.ac.ir
 
 if "%ERRORLEVEL%" neq "0" (
-	"C:\Program Files\OpenSSH\ssh" -N -L %lport%:%ip%:%rport% %user%@hpc.nit.ac.ir
+	"C:\Program Files\OpenSSH\ssh" -N -L %lport%:%addr%:%rport% %user%@hpc.nit.ac.ir
 )
 if "%ERRORLEVEL%" neq "0" (
-	"C:\Program Files\OpenSSH-Win64\ssh" -N -L %lport%:%ip%:%rport% %user%@hpc.nit.ac.ir
+	"C:\Program Files\OpenSSH-Win64\ssh" -N -L %lport%:%addr%:%rport% %user%@hpc.nit.ac.ir
 )
 if "%ERRORLEVEL%" neq "0" echo OpenSSH failed!
 echo /p ln="Press return to exit..."
