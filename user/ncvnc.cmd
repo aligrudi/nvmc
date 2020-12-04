@@ -10,10 +10,10 @@ echo Using OpenSSH to forward VNC connections...
 ssh -L %port%:/home/%user%/%vm%.vnc %user%@hpc.nit.ac.ir ncuser vncs %vm%
 
 if "%ERRORLEVEL%" neq "0" (
-	"C:\Program Files\OpenSSH\ssh" -L %port%:/home/%user%/%vm%.vnc %user%@hpc.nit.ac.ir ncuser vncs %vm%
+	"OpenSSH-Win64\ssh" -L %port%:/home/%user%/%vm%.vnc %user%@hpc.nit.ac.ir ncuser vncs %vm%
 )
 if "%ERRORLEVEL%" neq "0" (
-	"C:\Program Files\OpenSSH-Win64\ssh" -L %port%:/home/%user%/%vm%.vnc %user%@hpc.nit.ac.ir ncuser vncs %vm%
+	"OpenSSH-Win32\ssh" -L %port%:/home/%user%/%vm%.vnc %user%@hpc.nit.ac.ir ncuser vncs %vm%
 )
 if "%ERRORLEVEL%" neq "0" echo OpenSSH failed!
 echo /p ln="Press return to exit..."
