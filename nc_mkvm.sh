@@ -9,6 +9,7 @@ MACPT="52:54:CC:5E:%02X:%02X"
 # VM variables
 mems="1"
 cpus="1"
+initdisk="10"
 disk=""
 user="root"
 name=""
@@ -29,7 +30,7 @@ printusage() {
 	echo "  -m mem     memory size (GB)"
 	echo "  -d size    disk size (GB)"
 	echo "  -h host    VM host"
-	echo "  -t disk    disk image (blank, ubuntu16, ubuntu18, windows10, ubuntu18-cuda)"
+	echo "  -t disk    template/disk image (use -T to list)"
 	echo "  -i iso     CD/DVD ISO"
 	echo "  -g gpu#    GPU number to passthrough (1, 2)"
 	echo "  -net x     NIC type (b: bridge, u: slirp)"
@@ -41,58 +42,77 @@ if test "$#" = "0"; then
 	exit
 fi
 
-while test "$#" -ge 1; do
-	case "$1" in
-		-c)
-			cpus="$2"
-			shift && test "$#" -ge 1 && shift
-			;;
-		-m)
-			mems="$2"
-			shift && test "$#" -ge 1 && shift
-			;;
-		-d)
-			disk="$2"
-			shift && test "$#" -ge 1 && shift
-			;;
-		-n)
-			name="$2"
-			shift && test "$#" -ge 1 && shift
-			;;
-		-u)
-			user="$2"
-			shift && test "$#" -ge 1 && shift
-			;;
-		-h)
-			host="$2"
-			shift && test "$#" -ge 1 && shift
-			;;
-		-t)
-			temp="$2"
-			shift && test "$#" -ge 1 && shift
-			;;
-		-i)
-			iso="$iso $2"
-			shift && test "$#" -ge 1 && shift
-			;;
-		-g)
-			gpu="$gpu $2"
-			shift && test "$#" -ge 1 && shift
-			;;
-		-net)
-			net="$2"
-			shift && test "$#" -ge 1 && shift
-			;;
-		-cln)
-			cln="$2"
-			shift && test "$#" -ge 1 && shift
-			;;
-		*)
-			printusage
-			exit 1
-			;;
-	esac
-done
+readoptions() {
+	while test "$#" -ge 1; do
+		case "$1" in
+			-c)
+				cpus="$2"
+				shift && test "$#" -ge 1 && shift
+				;;
+			-m)
+				mems="$2"
+				shift && test "$#" -ge 1 && shift
+				;;
+			-d)
+				disk="$2"
+				shift && test "$#" -ge 1 && shift
+				;;
+			-D)
+				initdisk="$2"
+				shift && test "$#" -ge 1 && shift
+				;;
+			-n)
+				name="$2"
+				shift && test "$#" -ge 1 && shift
+				;;
+			-u)
+				user="$2"
+				shift && test "$#" -ge 1 && shift
+				;;
+			-h)
+				host="$2"
+				shift && test "$#" -ge 1 && shift
+				;;
+			-t)
+				temp="$2"
+				shift && test "$#" -ge 1 && shift
+				;;
+			-i)
+				iso="$iso $2"
+				shift && test "$#" -ge 1 && shift
+				;;
+			-g)
+				gpu="$gpu $2"
+				shift && test "$#" -ge 1 && shift
+				;;
+			-net)
+				net="$2"
+				shift && test "$#" -ge 1 && shift
+				;;
+			-cln)
+				cln="$2"
+				shift && test "$#" -ge 1 && shift
+				;;
+			-T)
+				test -f $NCDIR/temp.txt && cat $NCDIR/temp.txt
+				exit
+				shift
+				;;
+			*)
+				printusage
+				exit 1
+				;;
+		esac
+	done
+}
+
+readoptions $*
+
+# Read template options
+if grep "^$temp	" $NCDIR/temp.txt 1>/dev/null 2>&1; then
+	opts="`grep \"^$temp	\" $NCDIR/temp.txt | cut -f 2`"
+	readoptions $opts
+fi
 
 if test -z "$name"; then
 	echo "VM name cannot be empty"
@@ -116,11 +136,9 @@ fi
 mkdir -p $vm
 echo $cpus >$vm/CPUS
 echo $mems >$vm/MEMS
-echo $disk >$vm/DISK
+echo $initdisk >$vm/DISK
 id -u $user >$vm/USER
 echo $host >$vm/HOST
-echo "10" >$vm/DISK
-test "$temp" = "windows10" && echo 30 >$vm/DISK
 
 # Adding Qemu options
 for x in $iso; do
