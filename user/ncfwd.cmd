@@ -9,7 +9,7 @@ set "rport=3389"
 rem Read variables
 set /p user="User name (%user%): "
 set /p addr="VM IP address (%addr%): "
-set /p lport="Local port (%lport%)): "
+set /p lport="Local port (%lport%): "
 set /p rport="VM port (%rport%): "
 
 rem Change to script directory
