@@ -89,8 +89,10 @@ nchost_usedcpus() {
 	for vm in $VMDIR/*; do
 		if test -f "$vm/STAT"; then
 			if test -f "$vm/HOST" && test "`cat $vm/HOST`" = "$host"; then
-				cur="`cat $vm/CPUS`"
-				cnt="`expr $cnt + $cur`"
+				if test -f "$vm/USER" && test "`cat $vm/USER`" -ge 0; then
+					cur="`cat $vm/CPUS`"
+					cnt="`expr $cnt + $cur`"
+				fi
 			fi
 		fi
 	done
@@ -103,8 +105,10 @@ nchost_usedmems() {
 	for vm in $VMDIR/*; do
 		if test -f "$vm/STAT"; then
 			if test -f "$vm/HOST" && test "`cat $vm/HOST`" = "$host"; then
-				cur="`cat $vm/MEMS`"
-				cnt="`expr $cnt + $cur`"
+				if test -f "$vm/USER" && test "`cat $vm/USER`" -ge 0; then
+					cur="`cat $vm/MEMS`"
+					cnt="`expr $cnt + $cur`"
+				fi
 			fi
 		fi
 	done
