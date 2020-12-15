@@ -80,7 +80,7 @@ ncstat() {
 }
 
 ncstat_colour() {
-	ncstat $* | sed "s/disabled/[33m&[0m/; s/running/[32m&[0m/;"
+	ncstat $* | sed "/enabled/s/running/[32m&[0m/g; /disabled/s/^.*\$/[37m&[0m/; /disabled/s/\(running\|paused\)/[31m&[37m/; "
 }
 
 nchost_usedcpus() {
