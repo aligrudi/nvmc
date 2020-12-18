@@ -83,31 +83,18 @@ ncstat_colour() {
 	ncstat $* | sed "/enabled/s/running/[32m&[0m/g; /disabled/s/^.*\$/[37m&[0m/; /disabled/s/\(running\|paused\)/[31m&[37m/; "
 }
 
-nchost_usedcpus() {
+nchost_used() {
 	host="$1"
+	type="$2"
 	cnt="0"
 	for vm in $VMDIR/*; do
 		if test -f "$vm/STAT"; then
 			if test -f "$vm/HOST" && test "`cat $vm/HOST`" = "$host"; then
 				if test -f "$vm/USER" && test "`cat $vm/USER`" -ge 0; then
-					cur="`cat $vm/CPUS`"
-					cnt="`expr $cnt + $cur`"
-				fi
-			fi
-		fi
-	done
-	echo $cnt
-}
-
-nchost_usedmems() {
-	host="$1"
-	cnt="0"
-	for vm in $VMDIR/*; do
-		if test -f "$vm/STAT"; then
-			if test -f "$vm/HOST" && test "`cat $vm/HOST`" = "$host"; then
-				if test -f "$vm/USER" && test "`cat $vm/USER`" -ge 0; then
-					cur="`cat $vm/MEMS`"
-					cnt="`expr $cnt + $cur`"
+					if test -f "$vm/$type"; then
+						cur="`cat $vm/$type`"
+						cnt="`expr $cnt + $cur`"
+					fi
 				fi
 			fi
 		fi
@@ -118,9 +105,12 @@ nchost_usedmems() {
 nchoststat() {
 	h="$1"
 	host=`basename $h`
-	cpus=`nchost_usedcpus $host`
-	mems=`nchost_usedmems $host`
-	echo "$host	`cat $h/ADDR`	$cpus/`cat $h/CPUS`	$mems/`cat $h/MEMS`"
+	cpus=`nchost_used $host CPUS`
+	mems=`nchost_used $host MEMS`
+	gpus=`nchost_used $host GPUS`
+	hostgpus="0"
+	test -f "$h/GPUS" && hostgpus="`cat $h/GPUS`"
+	echo "$host	`cat $h/ADDR`	$cpus/`cat $h/CPUS`	$mems/`cat $h/MEMS`	$gpus/$hostgpus"
 }
 
 nchost() {

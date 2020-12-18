@@ -137,8 +137,9 @@ mkdir -p $vm
 echo $cpus >$vm/CPUS
 echo $mems >$vm/MEMS
 echo $initdisk >$vm/DISK
-id -u $user >$vm/USER
+echo $gpu | wc -w >$vm/GPUS
 echo $host >$vm/HOST
+id -u $user >$vm/USER
 
 # Adding Qemu options
 for x in $iso; do
