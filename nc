@@ -115,13 +115,25 @@ nchost_usedmems() {
 	echo $cnt
 }
 
+nchoststat() {
+	h="$1"
+	host=`basename $h`
+	cpus=`nchost_usedcpus $host`
+	mems=`nchost_usedmems $host`
+	echo "$host	`cat $h/ADDR`	$cpus/`cat $h/CPUS`	$mems/`cat $h/MEMS`"
+}
+
 nchost() {
-	for h in $HSDIR/*/; do
-		host=`basename $h`
-		cpus=`nchost_usedcpus $host`
-		mems=`nchost_usedmems $host`
-		echo "$host	`cat $h/ADDR`	$cpus/`cat $h/CPUS`	$mems/`cat $h/MEMS`"
-	done
+	if test "$#" -le "1"; then
+		for h in $HSDIR/*/; do
+			nchoststat $h
+		done
+	else
+		host="$2"
+		if test -n "$host" -a -d "$HSDIR/$host"; then
+			nchoststat "$HSDIR/$host"
+		fi
+	fi
 }
 
 ncslot_find() {
