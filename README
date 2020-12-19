@@ -48,7 +48,7 @@ Helpers:
 + nc_backup.sh: create a backup of NCDIR.
 
 For VM users:
-+ users/ncvnc.sh: create a VNC tunnel to a VM and manage it.
++ users/ncfwd.sh: create a VNC or SSH tunnel to a VM.
 + users/ncvnc.cmd: create a VNC tunnel to a VM for windows.
 + users/vmdisk.sh: extend partition after enlarging VM disk.
 
