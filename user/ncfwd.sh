@@ -5,7 +5,7 @@ user="user"
 port="5909"
 vm=""
 ip=""
-cmd="type"
+cmd=""
 
 printusage() {
 	echo "Usage: $0 options"
