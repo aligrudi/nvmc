@@ -39,7 +39,7 @@ EXECUTABLES
 
 The main programs:
 + nc: main commands; shows available commands, if executed without arguments.
-+ ncot: helper commands; shows available commands, if executed without arguments.
++ ncx: helper commands; shows available commands, if executed without arguments.
 + ncvm: executed on host nodes for managing VMs.
 + nclogin: for VM user login.
 
