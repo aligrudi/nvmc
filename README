@@ -38,14 +38,10 @@ EXECUTABLES
 ===========
 
 The main programs:
-+ nc: the main program; shows available commands, if executed without arguments.
++ nc: main commands; shows available commands, if executed without arguments.
++ ncot: helper commands; shows available commands, if executed without arguments.
 + ncvm: executed on host nodes for managing VMs.
 + nclogin: for VM user login.
-
-Helpers:
-+ nc_mkuser.sh: make a VM user.
-+ nc_mkvm.sh: make a VM.
-+ nc_backup.sh: create a backup of NCDIR.
 
 For VM users:
 + users/ncfwd.sh: create a VNC or SSH tunnel to a VM.
