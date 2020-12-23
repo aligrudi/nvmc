@@ -382,7 +382,7 @@ ncuser() {
 	fi
 }
 
-echo "`date '+%Y:%m:%d %T'`	$*" >>$NCDIR/nc.log
+test "$#" -gt "0" && echo "`date '+%Y:%m:%d %T'`	$*" >>$NCDIR/nc.log
 
 # Main commands
 case "$1" in
