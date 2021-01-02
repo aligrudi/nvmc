@@ -12,8 +12,8 @@ printusage() {
 	echo
 	echo "Options:"
 	echo "  -u user    username"
-	echo "  -p port    port to forward"
-	echo "  -h host    hostname"
+	echo "  -p port    port to forward ($port)"
+	echo "  -h host    hostname ($host)"
 	echo "  -vnc vm    forward VNC connections"
 	echo "  -ssh ip    forward SSH connections"
 	echo "  -rdp ip    forward RDP connections"
@@ -63,6 +63,6 @@ if test -z "$cmd"; then
 	printusage
 	exit 1
 fi
-test "$cmd" = "vnc" && ssh -L $port:/home/$user/$vm.vnc $user@$host $cmd $vm
+test "$cmd" = "vnc" && ssh -L $port:/home/$user/$vm.vnc $user@$host ncuser vncs $vm
 test "$cmd" = "ssh" && ssh -N -L $port:$ip:22 $user@$host
 test "$cmd" = "rdp" && ssh -N -L $port:$ip:3389 $user@$host
