@@ -12,7 +12,7 @@ ncuser: ncuser.o
 install: ncuser
 	@echo "Copying files to /var/nc"
 	@mkdir -p /var/nc
-	@cp QEMU nc ncx ncvm nclogin /var/nc/
+	@cp QEMU nc ncx ncvm nclogin ncuser /var/nc/
 	@chmod +s /var/nc/ncuser
 	@echo "Copying binaries"
 	@cp nc ncx $(BINDIR)
