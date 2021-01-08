@@ -25,7 +25,6 @@ $QEMU -name nvmc`printf '%03d' $SLOT` \
 	-rtc base=utc \
 	-boot strict=on \
 	-drive file=disk,format=qcow2,if=virtio,id=disk,cache=none,media=disk \
-	-vga cirrus \
 	-vnc unix:$VNC \
 	$NET \
 	-device virtio-balloon-pci,id=balloon0 \
