@@ -163,6 +163,7 @@ ncmkvm() {
 	echo "test -f disk && exit" >>$vm/INIT
 	# Create a local copy of the image if it does not exist
 	echo "if test ! -f $IMDIR/$img && test -f $IMDIR_MAIN/$img; then" >>$vm/INIT
+	echo "	mkdir -p $IMDIR/" >>$vm/INIT
 	echo "	cp $IMDIR_MAIN/$img $IMDIR/$img" >>$vm/INIT
 	echo "fi" >>$vm/INIT
 	# Create VM's disk image
