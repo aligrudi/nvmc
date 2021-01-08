@@ -8,7 +8,7 @@ HSDIR="$NCDIR/hosts"
 MACPT="52:54:CC:5E:%02X:%02X"
 ADDPT="10.1.%d.%d"
 
-# make VM variables
+# mkvm variables
 mems="1"
 cpus="1"
 initdisk="10"
@@ -16,7 +16,7 @@ disk=""
 user="root"
 name=""
 host="host1"
-temp="ubuntu16"
+temp=""
 gpu=""
 iso=""
 img=""
@@ -97,7 +97,7 @@ mkvmoptions() {
 				shift && test "$#" -ge 1 && shift
 				;;
 			-T)
-				test -f $NCDIR/temp.txt && cat $NCDIR/temp.txt
+				test -f $NCDIR/TEMP && cat $NCDIR/TEMP
 				return 1
 				;;
 			*)
@@ -118,8 +118,8 @@ ncmkvm() {
 		return 1
 	fi
 	# Read template options
-	if grep "^$temp	" $NCDIR/temp.txt 1>/dev/null 2>&1; then
-		opts="`grep \"^$temp	\" $NCDIR/temp.txt | cut -f 2`"
+	if test -n "$temp" && grep "^$temp	" $NCDIR/TEMP 1>/dev/null 2>&1; then
+		opts="`grep \"^$temp	\" $NCDIR/TEMP | cut -f 2`"
 		mkvmoptions $opts
 	fi
 	# Check VM name
