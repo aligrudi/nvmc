@@ -19,6 +19,7 @@ host="host1"
 temp="ubuntu16"
 gpu=""
 iso=""
+img=""
 net=""
 cln=""
 
@@ -32,7 +33,8 @@ mkvmusage() {
 	echo "  -m mem     memory size (GB)"
 	echo "  -d size    disk size (GB)"
 	echo "  -h host    VM host"
-	echo "  -t disk    template/disk image (use -T to list)"
+	echo "  -t disk    template (use -T to list)"
+	echo "  -q img     disk image (qcow2)"
 	echo "  -i iso     CD/DVD ISO"
 	echo "  -g gpu#    GPU number to passthrough (1, 2)"
 	echo "  -net x     NIC type (b: bridge, u: slirp)"
@@ -72,6 +74,10 @@ mkvmoptions() {
 				;;
 			-t)
 				temp="$2"
+				shift && test "$#" -ge 1 && shift
+				;;
+			-q)
+				img="$2"
 				shift && test "$#" -ge 1 && shift
 				;;
 			-i)
@@ -154,9 +160,9 @@ ncmkvm() {
 	echo "#!/bin/sh" >$vm/INIT
 	echo "test -f disk && exit" >>$vm/INIT
 	if test -z "$cln" -o "$cln" = "c"; then
-		echo "cp $NCDIR/imgs/$temp.img disk" >>$vm/INIT
+		echo "cp $NCDIR/imgs/$img disk" >>$vm/INIT
 	else
-		echo "qemu-img create -f qcow2 -b $NCDIR/imgs/$temp.img disk" >>$vm/INIT
+		echo "qemu-img create -f qcow2 -b $NCDIR/imgs/$img disk" >>$vm/INIT
 	fi
 	chmod +x $vm/INIT
 	if test -n "$disk"; then
