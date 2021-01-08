@@ -5,6 +5,8 @@
 NCDIR="/var/nc"
 VMDIR="$NCDIR/vms"
 HSDIR="$NCDIR/hosts"
+IMDIR="$NCDIR/imgs"
+IMDIR_MAIN="$NCDIR/imgs_main"
 MACPT="52:54:CC:5E:%02X:%02X"
 ADDPT="10.1.%d.%d"
 
@@ -33,7 +35,7 @@ mkvmusage() {
 	echo "  -m mem     memory size (GB)"
 	echo "  -d size    disk size (GB)"
 	echo "  -h host    VM host"
-	echo "  -t disk    template (use -T to list)"
+	echo "  -t temp    template (use -T to list)"
 	echo "  -q img     disk image (qcow2)"
 	echo "  -i iso     CD/DVD ISO"
 	echo "  -g gpu#    GPU number to passthrough (1, 2)"
@@ -150,7 +152,7 @@ ncmkvm() {
 	id -u $user >$vm/USER
 	# Adding Qemu options
 	for x in $iso; do
-		echo "-drive file=$NCDIR/imgs/$x,format=raw,readonly=on,media=cdrom" >>$vm/OPTS
+		echo "-drive file=$IMDIR/$x,format=raw,readonly=on,media=cdrom" >>$vm/OPTS
 	done
 	for x in $gpu; do
 		test "$x" = "1" && echo "-device vfio-pci,host=0b:00.1 -device vfio-pci,host=0b:00.2 -device vfio-pci,host=0b:00.0 -device vfio-pci,host=0b:00.3" >>$vm/OPTS
@@ -159,10 +161,15 @@ ncmkvm() {
 	# Create INIT script
 	echo "#!/bin/sh" >$vm/INIT
 	echo "test -f disk && exit" >>$vm/INIT
+	# Create a local copy of the image if it does not exist
+	echo "if test ! -f $IMDIR/$img && test -f $IMDIR_MAIN/$img; then" >>$vm/INIT
+	echo "	cp $IMDIR_MAIN/$img $IMDIR/$img" >>$vm/INIT
+	echo "fi" >>$vm/INIT
+	# Create VM's disk image
 	if test -z "$cln" -o "$cln" = "c"; then
-		echo "cp $NCDIR/imgs/$img disk" >>$vm/INIT
+		echo "cp $IMDIR/$img disk" >>$vm/INIT
 	else
-		echo "qemu-img create -f qcow2 -b $NCDIR/imgs/$img disk" >>$vm/INIT
+		echo "qemu-img create -f qcow2 -b $IMDIR/$img disk" >>$vm/INIT
 	fi
 	chmod +x $vm/INIT
 	if test -n "$disk"; then

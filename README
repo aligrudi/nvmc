@@ -61,19 +61,22 @@ connect to VMs.
 + Install NVMC on the master node (make install)
 + Add a directory in NCDIR/hosts/ for each host, containing ADDR, CPUS, MEMS.
 + Install NVMC on host nodes (nc hostinit)
-+ Create VM users (use nc_mkuser.sh)
-+ Create VMs (use nc_mkvm.sh or create the necessary files in NCDIR/vms/NAME)
++ Create VM users (use "ncx mkuser")
++ Create VMs (use "ncx mkvm" or create the necessary files in NCDIR/vms/NAME)
 
-The script nc_mkvm.sh assumes that disk images are stored in
-NCDIR/imgs directory on host nodes.  Note that after changing the
-files in a VM directory of the master node, nc push command should be
-used to update the VM on its host node.
+The script ncx assumes that disk images are stored in NCDIR/imgs
+directory on host nodes; if they are missing, they are retrieved
+from NCDIR/imgs_main, if it exists (it can be mounted via NFS).
+Note that after changing the files in a VM directory of the master
+node, nc push command should be invoked to update the VM on its
+host node.
 
 If the EMAC file is missing or empty in a VM directory, NVMC uses
 Qemu's user networking for that VM.  Otherwise, NVMC uses bridged
 networking with the provided MAC address.  In that case, the bridge
 br0 should be set up properly and the file /etc/qemu/bridge.conf
-should contain "allow br0".
+should contain "allow br0".  Edit the ncx script to change VM MAC
+address patterns.
 
 On host nodes, NVMC executes Qemu as root, unless user nvmc exists.
 To create it, execute the following commands on each host node.
