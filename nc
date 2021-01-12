@@ -108,9 +108,12 @@ nchoststat() {
 	cpus=`nchost_used $host CPUS`
 	mems=`nchost_used $host MEMS`
 	gpus=`nchost_used $host GPUS`
+	disk=`nchost_used $host DISK`
 	hostgpus="0"
+	hostdisk="0"
 	test -f "$h/GPUS" && hostgpus="`cat $h/GPUS`"
-	echo "$host	`cat $h/ADDR`	$cpus/`cat $h/CPUS`	$mems/`cat $h/MEMS`	$gpus/$hostgpus"
+	test -f "$h/DISK" && hostdisk="`cat $h/DISK`"
+	echo "$host	`cat $h/ADDR`	$cpus/`cat $h/CPUS`	$mems/`cat $h/MEMS`	$gpus/$hostgpus	$disk/$hostdisk"
 }
 
 nchost() {
