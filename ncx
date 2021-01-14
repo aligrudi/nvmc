@@ -161,11 +161,13 @@ ncmkvm() {
 	# Create INIT script
 	echo "#!/bin/sh" >$vm/INIT
 	echo "test -f disk && exit" >>$vm/INIT
-	# Create a local copy of the image if it does not exist
-	echo "if test ! -f $IMDIR/$img && test -f $IMDIR_MAIN/$img; then" >>$vm/INIT
-	echo "	mkdir -p $IMDIR/" >>$vm/INIT
-	echo "	cp $IMDIR_MAIN/$img $IMDIR/$img" >>$vm/INIT
-	echo "fi" >>$vm/INIT
+	# Create a local copy of referenced images if they do not exist
+	for x in $img $iso; do
+		echo "if test ! -f $IMDIR/$x && test -f $IMDIR_MAIN/$x; then" >>$vm/INIT
+		echo "	mkdir -p $IMDIR/" >>$vm/INIT
+		echo "	cp $IMDIR_MAIN/$x $IMDIR/$x" >>$vm/INIT
+		echo "fi" >>$vm/INIT
+	done
 	# Create VM's disk image
 	if test -z "$cln" -o "$cln" = "c"; then
 		echo "cp $IMDIR/$img disk" >>$vm/INIT
