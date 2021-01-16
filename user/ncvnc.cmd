@@ -1,6 +1,7 @@
 echo off
 
 rem Default values
+set "host=hpc.nit.ac.ir"
 set "vm="
 set "port=5909"
 set "user="
@@ -14,7 +15,7 @@ rem Change to script directory
 cd /d "%~dp0"
 
 rem SSH options
-set "opts=-L %port%:/home/%user%/%vm%.vnc %user%@hpc.nit.ac.ir ncuser vncs %vm%"
+set "opts=-L %port%:/home/%user%/%vm%.vnc %user%@%host% ncuser vncs %vm%"
 
 echo Using OpenSSH to forward VNC connections...
 ssh %opts%

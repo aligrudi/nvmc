@@ -1,6 +1,7 @@
 echo off
 
 rem Default values
+set "host=hpc.nit.ac.ir"
 set "user="
 set "addr="
 set "lport=2000"
@@ -16,7 +17,7 @@ rem Change to script directory
 cd /d "%~dp0"
 
 rem SSH options
-set "opts=-N -L %lport%:%addr%:%rport% %user%@hpc.nit.ac.ir"
+set "opts=-N -L %lport%:%addr%:%rport% %user%@%host%"
 
 echo Using OpenSSH to forward connections...
 ssh %opts%
