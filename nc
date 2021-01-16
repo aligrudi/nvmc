@@ -160,12 +160,17 @@ ncvmcheck() {
 	fi
 }
 
-ncpush() {
+ncslot() {
 	vm="$2"
 	ncvmcheck $vm || return 1
 	if test ! -f $VMDIR/$vm/SLOT; then
 		ncslot_find >$VMDIR/$vm/SLOT
 	fi
+}
+
+ncpush() {
+	vm="$2"
+	ncslot slot "$2" || return 1
 	host="`cat $VMDIR/$vm/HOST`"
 	addr="`cat $HSDIR/$host/ADDR`"
 	if $SCP -r $VMDIR/$vm $addr:$VMDIR/; then
@@ -432,6 +437,9 @@ case "$1" in
 	save)
 		ncsave $* || exit 1
 		;;
+	slot)
+		ncslot $* || exit 1
+		;;
 	move)
 		ncmove $* || exit 1
 		;;
@@ -456,6 +464,7 @@ case "$1" in
 		echo "  save      save VM state and stop VM"
 		echo "  move      migrate VM to a host"
 		echo "  user      enable/disable user connections to a VM"
+		echo "  slot      assign a slot to a VM"
 		echo "  hostinit  install or update NVMC on host nodes"
 		echo
 		echo "Available commands for managing VMs:"
