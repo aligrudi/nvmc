@@ -26,7 +26,7 @@ net=""
 cln=""
 
 mkvmusage() {
-	echo "Usage: $0 options"
+	echo "Usage: mkvm options"
 	echo
 	echo "Options:"
 	echo "  -n name    VM name"
@@ -110,14 +110,14 @@ mkvmoptions() {
 	done
 }
 
-ncmkvm() {
+xmkvm() {
 	shift
 	if test "$#" = "0"; then
 		mkvmusage
 		return 1
 	fi
 	if ! mkvmoptions $*; then
-		return 1
+		return 2
 	fi
 	# Read template options
 	if test -n "$temp" && grep "^$temp	" $NCDIR/TEMP 1>/dev/null 2>&1; then
@@ -127,23 +127,23 @@ ncmkvm() {
 	# Check VM name
 	if test -z "$name"; then
 		echo "VM name cannot be empty"
-		return 1
+		return 3
 	fi
 	vm="$VMDIR/$name"
-	if test -d $vm; then
-		echo "Directory <$vm> already exists"
-		return 1
-	fi
 	if test ! -d "$HSDIR/$host"; then
 		echo "Unknown host <$host>"
-		return 1
+		return 4
 	fi
 	if ! id $user >/dev/null 2>&1; then
 		echo "Unknown user <$user>"
-		return 1
+		return 5
 	fi
-	# Create VM directory and files
-	mkdir -p $vm
+	mkdir -p $VMDIR
+	if ! mkdir $vm; then
+		echo "Directory <$vm> already exists"
+		return 6
+	fi
+	# Create VM files
 	echo $cpus >$vm/CPUS
 	echo $mems >$vm/MEMS
 	echo $initdisk >$vm/DISK
@@ -184,7 +184,7 @@ ncmkvm() {
 		fi
 	fi
 	# Allocate a VM slot
-	nc slot $name
+	$NCDIR/nc slot $name
 	slot="`cat $vm/SLOT`"
 	# VM information
 	echo "VM name         $name"
@@ -199,19 +199,20 @@ ncmkvm() {
 		emac="`cat $vm/EMAC`"
 		echo "VM mac address  $emac"
 	fi
-	# Start the VM
-	if ! nc push $name; then
-		echo "Retry <nc push $name> later"
-		return 1
-	fi
 }
 
-ncrmvm() {
+xrmvm() {
 	shift
-	nc drop $1
+	$NCDIR/nc quit $1
+	$NCDIR/nc drop $1
 }
 
-ncmkuser() {
+xpush() {
+	shift
+	$NCDIR/nc push $1
+}
+
+xmkuser() {
 	shift
 	if test "$#" -lt 2; then
 		echo "Usage: $0 username password"
@@ -223,20 +224,20 @@ ncmkuser() {
 	name=""
 	if test -d /home/$user; then
 		echo "User $user already exists"
-		return 1
+		return 2
 	fi
 	if ! useradd -d /home/$user -g $group -m -N -c "$name" -s /var/nc/nclogin $user; then
 		echo "Failed to create user $name"
-		return 1
+		return 3
 	fi
 	chmod 700 /home/$user
 	if ! echo $user:$pass | chpasswd; then
 		echo "Failed to create user $name's password"
-		return 1
+		return 4
 	fi
 }
 
-ncrmuser() {
+xrmuser() {
 	shift
 	user="$1"
 	if test -z "$user"; then
@@ -254,14 +255,14 @@ ncrmuser() {
 	rm -r /home/$user
 }
 
-ncbackup() {
+xbackup() {
 	name="nvmc`date '+%Y%m%d%H%M%S'`"
 	cp -r /var/nc $name
 	tar czf $name.tar.gz $name
 	rm -r "$name"
 }
 
-ncmacs() {
+xmacs() {
 	shift
 	n="$1"
 	test -z "$n" && n="200"
@@ -271,22 +272,99 @@ ncmacs() {
 	done
 }
 
-ncaddr() {
+xaddr() {
 	shift
 	vm="$1"
 	if test -z "$vm"; then
 		echo "Usage: $0 vm_name"
-		exit
+		return 1
 	fi
 	if test ! -d "$VMDIR/$vm"; then
 		echo "Directory $VMDIR/$vm does not exist"
-		exit 1
+		return 2
 	fi
 	slot="`cat $VMDIR/$vm/SLOT`"
 	printf "$ADDPT\n" "`expr 2 + $slot / 250`" "`expr $slot % 250 + 1`"
 }
 
-ncdhcpconf() {
+xstop() {
+	shift
+	vm="$1"
+	$NCDIR/nc user "$vm" -
+	$NCDIR/nc quit "$vm"
+}
+
+xcont() {
+	shift
+	vm="$1"
+	$NCDIR/nc user "$vm" +
+}
+
+xhost() {
+	shift
+	$NCDIR/nc host
+}
+
+editusage() {
+	echo "Usage: edit options"
+	echo
+	echo "Options:"
+	echo "  -n name    VM name"
+	echo "  -c cpus    CPU count"
+	echo "  -m mem     memory size (GB)"
+	echo "  -d disk    disk size (GB)"
+}
+
+xedit() {
+	shift
+	if test "$#" = "0"; then
+		editusage
+		return 1
+	fi
+	cpus=""
+	mems=""
+	disk=""
+	name=""
+	while test "$#" -ge 1; do
+		case "$1" in
+			-n)
+				name="$2"
+				shift && test "$#" -ge 1 && shift
+				;;
+			-c)
+				cpus="$2"
+				shift && test "$#" -ge 1 && shift
+				;;
+			-m)
+				mems="$2"
+				shift && test "$#" -ge 1 && shift
+				;;
+			-d)
+				disk="$2"
+				shift && test "$#" -ge 1 && shift
+				;;
+			*)
+				editoptions
+				return 1
+				;;
+		esac
+	done
+	# Check VM name
+	if test -z "$name"; then
+		echo "VM name cannot be empty"
+		return 2
+	fi
+	vm="$VMDIR/$name"
+	if test ! -d "$vm"; then
+		echo "Directory $VMDIR/$vm does not exist"
+		return 3
+	fi
+	test -n "$cpus" && echo "$cpus" >$vm/CPUS
+	test -n "$mems" && echo "$mems" >$vm/MEMS
+	test -n "$disk" && $NCDIR/nc size "$name" "$disk"
+}
+
+xdhcpconf() {
 	shift
 	echo "# VM subnet"
 	echo "subnet 10.1.0.0 netmask 255.255.0.0 {"
@@ -294,7 +372,7 @@ ncdhcpconf() {
 	echo "}"
 	echo "# VM IP addresses"
 	i="0"
-	ncmacs ncmacs $1 | while read x; do
+	xmacs xmacs $1 | while read x; do
 		mac="`echo $x | cut -d ' ' -f 1`"
 		ip="`echo $x | cut -d ' ' -f 2`"
 		echo "host nvmc$i {"
@@ -308,28 +386,55 @@ ncdhcpconf() {
 # Main commands
 case "$1" in
 	mkuser)
-		ncmkuser $* || exit 1
+		xmkuser $* || exit $?
 		;;
 	rmuser)
-		ncrmuser $* || exit 1
+		xrmuser $* || exit $?
 		;;
 	mkvm)
-		ncmkvm $* || exit 1
+		xmkvm $* || exit $?
 		;;
 	rmvm)
-		ncrmvm $* || exit 1
+		xrmvm $* || exit $?
+		;;
+	push)
+		xpush $* || exit $?
 		;;
 	addr)
-		ncaddr $* || exit 1
+		xaddr $* || exit $?
+		;;
+	stop)
+		xstop $* || exit $?
+		;;
+	cont)
+		xcont $* || exit $?
+		;;
+	host)
+		xhost $* || exit $?
+		;;
+	edit)
+		xedit $* || exit $?
 		;;
 	backup)
-		ncbackup $* || exit 1
+		xbackup $* || exit $?
 		;;
 	macs)
-		ncmacs $* || exit 1
+		xmacs $* || exit $?
+		;;
+	vmexec)
+		$NCDIR/nc exec $2 || exit $?
+		;;
+	vmpoff)
+		$NCDIR/nc poff $2 || exit $?
+		;;
+	vmquit)
+		$NCDIR/nc quit $2 || exit $?
+		;;
+	vmreboot)
+		$NCDIR/nc reboot $2 || exit $?
 		;;
 	dhcpconf)
-		ncdhcpconf $* || exit 1
+		xdhcpconf $* || exit $?
 		;;
 	*)
 		echo "Usage: $0 command [options]"
@@ -337,7 +442,12 @@ case "$1" in
 		echo "Available commands:"
 		echo "  mkvm      create a VM"
 		echo "  rmvm      remove a VM"
+		echo "  push      copy a VM to a host"
 		echo "  addr      print VM IP address"
+		echo "  stop      stop a VM and disable access"
+		echo "  cont      enable VM access"
+		echo "  edit      edit VM configuration"
+		echo "  host      show hosts"
 		echo "  mkuser    create a user"
 		echo "  rmuser    remove a user"
 		echo "  backup    create a backup of /var/nc"
