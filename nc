@@ -130,18 +130,8 @@ nchost() {
 }
 
 ncslot_find() {
-	slots="$NCDIR/.slots"
-	test -f $slots || seq 0 512 >$slots
-	cp $slots $slots.$$
-	for v in $VMDIR/*; do
-		if test -f $v/SLOT; then
-			cur="`cat $v/SLOT`"
-			sed "/^$cur\$/d" <$slots.$$ >$slots.$$.1
-			mv $slots.$$.1 $slots.$$
-		fi
-	done
-	head -n1 <$slots.$$
-	rm $slots.$$
+	cat $VMDIR/*/SLOT 2>/dev/null | sort -n | \
+		awk 'BEGIN {last = 0} NF > 0 {if (last < $1) {print last; exit} last = $1 + 1} END {print last}'
 }
 
 ncvmcheck() {
