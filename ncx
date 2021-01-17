@@ -183,25 +183,26 @@ ncmkvm() {
 			echo $disk >$vm/DISK
 		fi
 	fi
+	# Allocate a VM slot
+	nc slot $name
+	slot="`cat $vm/SLOT`"
 	# VM information
 	echo "VM name         $name"
 	echo "VM memory size  $mems"
 	echo "VM cpu count    $cpus"
 	echo "VM owner        $user"
 	echo "VM host         $host"
-	# Start the VM
-	if ! nc push $name; then
-		echo "Retry <nc push $name> later"
-		return 1
-	fi
-	slot="`cat $vm/SLOT`"
 	echo "VM slot         $slot"
 	# Assign a MAC address (for bridged networking)
 	if test -z "$net" -o "$net" = "b"; then
 		printf "$MACPT\\n" "`expr $slot / 256`" "`expr $slot % 256`" >$vm/EMAC
 		emac="`cat $vm/EMAC`"
 		echo "VM mac address  $emac"
-		nc push $name
+	fi
+	# Start the VM
+	if ! nc push $name; then
+		echo "Retry <nc push $name> later"
+		return 1
 	fi
 }
 
