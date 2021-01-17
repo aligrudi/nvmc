@@ -142,11 +142,11 @@ ncvmcheck() {
 	fi
 	if test ! -d "$VMDIR/$vm"; then
 		echo "nc: directory $VMDIR/$vm does not exist"
-		return 1
+		return 2
 	fi
 	if test ! -f "$VMDIR/$vm/HOST"; then
 		echo "nc: $VMDIR/$vm/HOST is missing"
-		return 1
+		return 3
 	fi
 }
 
@@ -169,34 +169,37 @@ ncpush() {
 				echo "OK" >$VMDIR/$vm/STAT
 			else
 				echo "nc: cannot initialize VM $vm on $host"
-				return 1
+				return 2
 			fi
 		fi
 	else
 		echo "nc: host $host does not respond"
-		return 1
+		return 3
 	fi
 }
 
 ncsize() {
 	vm="$2"
-	size="$3"
+	size1="0"
+	size2="$3"
 	ncvmcheck $vm || return 1
-	if test -z "$size"; then
+	if test -z "$size2"; then
 		echo "nc: size is missing"
-		return 1
+		return 2
 	fi
-	if test -f $VMDIR/$vm/DISK && test "$size" -le "`cat $VMDIR/$vm/DISK`"; then
+	test -f $VMDIR/$vm/DISK && size1="`cat $VMDIR/$vm/DISK`"
+	test "$size2" -eq "$size1" && return 0
+	if test "$size2" -lt "$size1"; then
 		echo "nc: cannot shrink VM disk"
-		return 1
+		return 3
 	fi
 	if test ! -x "$VMDIR/$vm/ONCE"; then
 		echo "#!/bin/sh" >$VMDIR/$vm/ONCE
 		chmod +x $VMDIR/$vm/ONCE
 	fi
 	echo "qemu-img snapshot -d nvmc0 disk" >>$VMDIR/$vm/ONCE
-	echo "qemu-img resize disk ${size}G" >>$VMDIR/$vm/ONCE
-	echo "$size" >$VMDIR/$vm/DISK
+	echo "qemu-img resize disk ${size2}G" >>$VMDIR/$vm/ONCE
+	echo "$size2" >$VMDIR/$vm/DISK
 }
 
 ncvm() {
@@ -219,7 +222,7 @@ ncexec() {
 	test -f $VMDIR/$vm/SAVE && opts="-loadvm `cat $VMDIR/$vm/SAVE`"
 	if ! $SSH $addr sh -c "\"nohup $HSBIN/ncvm $VMDIR/$vm exec $opts 0</dev/null 1>/dev/null 2>&1 &\""; then
 		echo "nc: failed to start the VM"
-		return 1
+		return 2
 	fi
 	test -f $VMDIR/$vm/ONCE && rm $VMDIR/$vm/ONCE
 	test -f $VMDIR/$vm/SAVE && rm $VMDIR/$vm/SAVE
@@ -235,18 +238,18 @@ ncname() {
 	fi
 	if test -d "$VMDIR/$name"; then
 		echo "nc: directory $VMDIR/$vm already exists"
-		return 1
+		return 2
 	fi
 	if test -f $VMDIR/$vm/HOST -a -f $VMDIR/$vm/STAT; then
 		host="`cat $VMDIR/$vm/HOST`"
 		addr="`cat $HSDIR/$host/ADDR`"
 		if test "`ncvm stat $vm`" != "off"; then
 			echo "nc: VM $vm should be off to rename"
-			return 1
+			return 3
 		fi
 		if ! $SSH $addr mv $VMDIR/$vm $VMDIR/$name; then
 			echo "nc: failed to rename VM $vm on $host"
-			return 1
+			return 4
 		fi
 	fi
 	mv $VMDIR/$vm $VMDIR/$name
@@ -261,11 +264,11 @@ ncdrop() {
 		addr="`cat $HSDIR/$host/ADDR`"
 		if test "`ncvm stat $vm`" != "off"; then
 			echo "nc: VM $vm should be off to drop"
-			return 1
+			return 2
 		fi
 		if ! $SSH $addr rm -r $VMDIR/$vm; then
 			echo "nc: failed to remove VM $vm on $host"
-			return 1
+			return 3
 		fi
 	fi
 	rm -r $VMDIR/$vm
@@ -323,13 +326,13 @@ ncsave() {
 	ncvmcheck $vm || return 1
 	if test "`ncvm stat $vm`" != "running"; then
 		echo "nc: VM $vm should be running to save"
-		return 1
+		return 2
 	fi
 	ncvm stop $vm
 	if ! ncvm save $vm nvmc0; then
 		echo "nc: failed to save VM $vm"
 		ncvm cont $vm
-		return 1
+		return 3
 	fi
 	ncvm quit $vm
 	echo nvmc0 >$VMDIR/$vm/SAVE
@@ -348,17 +351,17 @@ ncmove() {
 	addr2="`cat $HSDIR/$host2/ADDR`"
 	if test "$host1" = "$host2"; then
 		echo "nc: source and destination hosts are the same"
-		return 1
+		return 2
 	fi
 	stat="`ncvm stat $vm`"
 	if test "$stat" != "off" -a "$stat" != "saved"; then
 		echo "nc: VM should be off or saved to migrate"
-		return 1
+		return 3
 	fi
 	$SSH $addr1 rm -f $VMDIR/$vm/qemu.vnc
 	if ! $SSH $addr1 $SCP -r $VMDIR/$vm/ $addr2:$VMDIR; then
 		echo "nc: failed to copy VM files to HOST $host2"
-		return 1
+		return 4
 	fi
 	echo "$host2" >$VMDIR/$vm/HOST
 	$SCP $VMDIR/$vm/HOST $addr1:$VMDIR/$vm/
@@ -385,59 +388,59 @@ test "$#" -gt "0" && echo "`date '+%Y:%m:%d %T'`	$*" >>$NCDIR/nc.log
 # Main commands
 case "$1" in
 	host)
-		nchost $* || exit 1
+		nchost $* || exit $?
 		;;
 	hostinit)
-		nchostinit $* || exit 1
+		nchostinit $* || exit $?
 		;;
 	stat|vm)
 		if test -t 1; then
-			ncstat_colour $* || exit 1
+			ncstat_colour $* || exit $?
 		else
-			ncstat $* || exit 1
+			ncstat $* || exit $?
 		fi
 		;;
 	push)
-		ncpush $* || exit 1
+		ncpush $* || exit $?
 		;;
 	vncs)
-		ncvncs $* || exit 1
+		ncvncs $* || exit $?
 		;;
 	sshs)
-		ncsshs $* || exit 1
+		ncsshs $* || exit $?
 		;;
 	dist)
-		ncdist $* || exit 1
+		ncdist $* || exit $?
 		;;
 	disk)
-		ncdisk $* || exit 1
+		ncdisk $* || exit $?
 		;;
 	size)
-		ncsize $* || exit 1
+		ncsize $* || exit $?
 		;;
 	exec)
-		ncexec $* || exit 1
+		ncexec $* || exit $?
 		;;
 	name)
-		ncname $* || exit 1
+		ncname $* || exit $?
 		;;
 	drop)
-		ncdrop $* || exit 1
+		ncdrop $* || exit $?
 		;;
 	save)
-		ncsave $* || exit 1
+		ncsave $* || exit $?
 		;;
 	slot)
-		ncslot $* || exit 1
+		ncslot $* || exit $?
 		;;
 	move)
-		ncmove $* || exit 1
+		ncmove $* || exit $?
 		;;
 	user)
-		ncuser $* || exit 1
+		ncuser $* || exit $?
 		;;
 	stop|cont|quit|reboot|send|kill|poff|qlog)
-		ncvm $* || exit 1
+		ncvm $* || exit $?
 		;;
 	*)
 		echo "Usage: $0 command [options]"
