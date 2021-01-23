@@ -358,7 +358,7 @@ ncmove() {
 		echo "nc: VM should be off or saved to migrate"
 		return 3
 	fi
-	$SSH $addr1 rm -f $VMDIR/$vm/qemu.vnc
+	$SSH $addr1 rm -f $VMDIR/$vm/qemu.{vnc,mon}
 	if ! $SSH $addr1 $SCP -r $VMDIR/$vm/ $addr2:$VMDIR; then
 		echo "nc: failed to copy VM files to HOST $host2"
 		return 4
