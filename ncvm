@@ -79,7 +79,7 @@ vmqlog() {
 }
 
 vmsend() {
-	socat -T1 - $sock | tail -n +2 | head -n -1
+	test -S $sock && socat -T1 - $sock | tail -n +2 | head -n -1
 }
 
 vmsend_test() {
