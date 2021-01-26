@@ -129,6 +129,15 @@ nchost() {
 	fi
 }
 
+ncping() {
+	for h in $HSDIR/*/; do
+		host="`basename $h`"
+		stat="on"
+		$SSH `cat $h/ADDR` true || stat="off"
+		echo "$host	`cat $h/ADDR`	$stat"
+	done
+}
+
 ncslot_find() {
 	cat $VMDIR/*/SLOT 2>/dev/null | sort -n | \
 		awk 'BEGIN {last = 0} NF > 0 {if (last < $1) {print last; exit} last = $1 + 1} END {print last}'
@@ -409,8 +418,8 @@ case "$1" in
 	sshs)
 		ncsshs $* || exit $?
 		;;
-	dist)
-		ncdist $* || exit $?
+	ping)
+		ncping $* || exit $?
 		;;
 	disk)
 		ncdisk $* || exit $?
@@ -448,6 +457,7 @@ case "$1" in
 		echo "Available commands:"
 		echo "  host      show hosts"
 		echo "  stat      show VMs"
+		echo "  ping      show host status"
 		echo "  push      send a VM to host or update its files"
 		echo "  name      rename a VM"
 		echo "  drop      remove a VM"
