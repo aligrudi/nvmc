@@ -140,7 +140,7 @@ ncping() {
 
 ncslot_find() {
 	cat $VMDIR/*/SLOT 2>/dev/null | sort -n | \
-		awk 'BEGIN {last = 0} NF > 0 {if (last < $1) {print last; exit} last = $1 + 1} END {print last}'
+		awk 'BEGIN {last = 0} NF > 0 {if (last < $1) {exit} last = $1 + 1} END {print last}'
 }
 
 ncvmcheck() {
