@@ -3,35 +3,45 @@
 host="hpc.nit.ac.ir"
 user="user"
 port="5909"
+sshport="0"
+rdpport="0"
 vm=""
 ip=""
 cmd=""
+
+echo "NVMC Client Connection"
+echo
 
 printusage() {
 	echo "Usage: $0 options"
 	echo
 	echo "Options:"
-	echo "  -u user    username"
-	echo "  -p port    port to forward ($port)"
-	echo "  -h host    hostname ($host)"
-	echo "  -vnc vm    forward VNC connections"
-	echo "  -ssh ip    forward SSH connections"
-	echo "  -rdp ip    forward RDP connections"
+	echo "  -h host     host name ($host)"
+	echo "  -u user     user name"
+	echo "  -n vmname   VM name"
+	echo "  -i vmaddr   VM local IP address"
+	echo "  -vnc port   VNC local port ($port)"
+	echo "  -ssh port   SSH local port ($sshport)"
+	echo "  -rdp port   RDP local port ($rdpport)"
 }
 
+# Read options
 if test "$#" = "0"; then
 	printusage
 	exit
 fi
-
 while test "$#" -ge 1; do
 	case "$1" in
 		-u)
 			user="$2"
 			shift && test "$#" -ge 1 && shift
 			;;
-		-p)
-			port="$2"
+		-n)
+			vm="$2"
+			shift && test "$#" -ge 1 && shift
+			;;
+		-i)
+			ip="$2"
 			shift && test "$#" -ge 1 && shift
 			;;
 		-h)
@@ -39,18 +49,15 @@ while test "$#" -ge 1; do
 			shift && test "$#" -ge 1 && shift
 			;;
 		-vnc)
-			cmd="vnc"
-			vm="$2"
+			port="$2"
 			shift && test "$#" -ge 1 && shift
 			;;
 		-ssh)
-			cmd="ssh"
-			ip="$2"
+			sshport="$2"
 			shift && test "$#" -ge 1 && shift
 			;;
 		-rdp)
-			cmd="rdp"
-			ip="$2"
+			rdpport="$2"
 			shift && test "$#" -ge 1 && shift
 			;;
 		*)
@@ -59,10 +66,13 @@ while test "$#" -ge 1; do
 			;;
 	esac
 done
-if test -z "$cmd"; then
+if test -z "$vm$ip"; then
 	printusage
 	exit 1
 fi
-test "$cmd" = "vnc" && ssh -L $port:/home/$user/$vm.vnc $user@$host ncuser vncs $vm
-test "$cmd" = "ssh" && ssh -N -L $port:$ip:22 $user@$host
-test "$cmd" = "rdp" && ssh -N -L $port:$ip:3389 $user@$host
+
+# Forward connections
+test "0$port" -gt "0" && vncopts="-L $port:/home/$user/$vm.vnc"
+test "0$sshport" -gt "0" && sshopts="-L $sshport:$ip:22"
+test "0$rdpport" -gt "0" && rdpopts="-L $rdpport:$ip:3389"
+ssh $vncopts $sshopts $rdpopts $user@$host ncuser vncs $vm
