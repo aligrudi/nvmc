@@ -302,7 +302,7 @@ xcont() {
 
 xhost() {
 	shift
-	$NCDIR/nc host
+	$NCDIR/nc host "$@"
 }
 
 editusage() {
@@ -386,40 +386,40 @@ xdhcpconf() {
 # Main commands
 case "$1" in
 	mkuser)
-		xmkuser $* || exit $?
+		xmkuser "$@" || exit $?
 		;;
 	rmuser)
-		xrmuser $* || exit $?
+		xrmuser "$@" || exit $?
 		;;
 	mkvm)
-		xmkvm $* || exit $?
+		xmkvm "$@" || exit $?
 		;;
 	rmvm)
-		xrmvm $* || exit $?
+		xrmvm "$@" || exit $?
 		;;
 	push)
-		xpush $* || exit $?
+		xpush "$@" || exit $?
 		;;
 	addr)
-		xaddr $* || exit $?
+		xaddr "$@" || exit $?
 		;;
 	stop)
-		xstop $* || exit $?
+		xstop "$@" || exit $?
 		;;
 	cont)
-		xcont $* || exit $?
+		xcont "$@" || exit $?
 		;;
 	host)
-		xhost $* || exit $?
+		xhost "$@" || exit $?
 		;;
 	edit)
-		xedit $* || exit $?
+		xedit "$@" || exit $?
 		;;
 	backup)
-		xbackup $* || exit $?
+		xbackup "$@" || exit $?
 		;;
 	macs)
-		xmacs $* || exit $?
+		xmacs "$@" || exit $?
 		;;
 	vmexec)
 		$NCDIR/nc exec $2 || exit $?
@@ -434,7 +434,7 @@ case "$1" in
 		$NCDIR/nc reboot $2 || exit $?
 		;;
 	dhcpconf)
-		xdhcpconf $* || exit $?
+		xdhcpconf "$@" || exit $?
 		;;
 	*)
 		echo "Usage: $0 command [options]"
