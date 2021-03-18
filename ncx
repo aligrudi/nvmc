@@ -368,7 +368,7 @@ xdhcpconf() {
 	shift
 	echo "# VM subnet"
 	echo "subnet 10.1.0.0 netmask 255.255.0.0 {"
-	echo "  range 10.1.2.1 10.1.254.254;"
+	echo "  range 10.1.100.1 10.1.254.254;"
 	echo "}"
 	echo "# VM IP addresses"
 	i="0"
@@ -379,7 +379,7 @@ xdhcpconf() {
 		echo "  hardware ethernet $mac;"
 		echo "  fixed-address $ip;"
 		echo "}"
-		i="`expr $n + 1`"
+		i="`expr $i + 1`"
 	done
 }
 
