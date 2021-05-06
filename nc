@@ -325,8 +325,10 @@ ncvncs() {
 	host="`cat $VMDIR/$vm/HOST`"
 	addr="`cat $HSDIR/$host/ADDR`"
 	slot="`cat $VMDIR/$vm/SLOT`"
+	user="`cat $VMDIR/$vm/USER`"
 	$SSH -f -L $sock:$VMDIR/$vm/qemu.vnc $addr sleep 3h
 	sleep .5
+	chown "$user" $sock
 	chmod o+rw $sock
 }
 
