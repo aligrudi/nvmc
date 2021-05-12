@@ -40,6 +40,23 @@ nchostinit() {
 	done
 }
 
+nckeysinit() {
+	keys=$NCDIR/keys.pub
+	echo "Collecting keys..."
+	cat /root/.ssh/*.pub >$keys
+	for h in $HSDIR/*; do
+		addr="`cat $h/ADDR`"
+		echo "  `basename $h`"
+		$SSH $addr cat '/root/.ssh/*.pub' >>$keys
+	done
+	echo "Distributing keys..."
+	for h in $HSDIR/*; do
+		addr="`cat $h/ADDR`"
+		echo "  `basename $h`"
+		$SCP $keys $addr:/root/.ssh/authorized_keys 2>/dev/null
+	done
+}
+
 ncstat() {
 	shift 1
 	while test "$#" -ge 1; do
@@ -370,7 +387,7 @@ ncmove() {
 		return 3
 	fi
 	$SSH $addr1 rm -f $VMDIR/$vm/qemu.vnc $VMDIR/$vm/qemu.mon
-	if ! $SSH $addr1 $SCP -r $VMDIR/$vm/ $addr2:$VMDIR; then
+	if ! $SSH $addr1 $SCP -o StrictHostKeyChecking=no -r $VMDIR/$vm/ $addr2:$VMDIR; then
 		echo "nc: failed to copy VM files to HOST $host2"
 		return 4
 	fi
@@ -403,6 +420,9 @@ case "$1" in
 		;;
 	hostinit)
 		nchostinit $* || exit $?
+		;;
+	keysinit)
+		nckeysinit $* || exit $?
 		;;
 	stat|vm)
 		if test -t 1; then
@@ -471,6 +491,7 @@ case "$1" in
 		echo "  user      enable/disable user connections to a VM"
 		echo "  slot      assign a slot to a VM"
 		echo "  hostinit  install or update NVMC on host nodes"
+		echo "  keysinit  update authorized keys of host nodes"
 		echo
 		echo "Available commands for managing VMs:"
 		echo "  exec      start qemu"
