@@ -231,7 +231,7 @@ xmkuser() {
 		return 3
 	fi
 	chmod 700 /home/$user
-	if ! echo $user:$pass | chpasswd; then
+	if ! echo "$user:$pass" | chpasswd; then
 		echo "Failed to create user $name's password"
 		return 4
 	fi
