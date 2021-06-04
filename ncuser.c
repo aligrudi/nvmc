@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 		snprintf(user, sizeof(user), VMDIR "/%s/USER", args[0]);
 		fp = fopen(user, "r");
 		if (!fp) {
-			fprintf(stderr, "ncuser: USER file is missing\n");
+			fprintf(stderr, "ncuser: unknown VM (USER file is missing)\n");
 			return 1;
 		}
 		if (fscanf(fp, "%d", &uid) != 1) {
