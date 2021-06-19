@@ -17,8 +17,9 @@ NVMC uses the following directories on the master node:
 
 The directory NCDIR/hosts/HOST stores the details of host node HOST:
 + ADDR: the address of the host.
-+ CPUS: the number of available CPUS.
++ CPUS: the number of available CPUs.
 + MEMS: available memory in GB.
++ GPUS: the number of available GPUs.
 
 The directory NCDIR/vms/VM stores the details of virtual machine VM:
 + CPUS: the number of CPUS assigned to VM.
