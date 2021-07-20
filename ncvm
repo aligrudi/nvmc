@@ -47,10 +47,7 @@ vmexec() {
 		runas="-runas nvmc"
 		ulimit -l unlimited
 	fi
-	$qemu $runas $* &
-	pid="$!"
-	echo $pid >PID
-	wait $pid && rm PID
+	$qemu -daemonize -pidfile PID $runas $*
 }
 
 vmkill() {

@@ -246,7 +246,7 @@ ncexec() {
 	host="`cat $VMDIR/$vm/HOST`"
 	addr="`cat $HSDIR/$host/ADDR`"
 	test -f $VMDIR/$vm/SAVE && opts="-loadvm `cat $VMDIR/$vm/SAVE`"
-	if ! $SSH $addr sh -c "\"nohup $HSBIN/ncvm $VMDIR/$vm exec $opts 0</dev/null 1>/dev/null 2>&1 &\""; then
+	if ! $SSH $addr $HSBIN/ncvm $VMDIR/$vm exec $opts; then
 		echo "nc: failed to start the VM"
 		return 2
 	fi
