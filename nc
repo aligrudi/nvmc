@@ -147,11 +147,23 @@ nchost() {
 }
 
 ncping() {
+	shift
+	report="$@"
 	for h in $HSDIR/*/; do
 		host="`basename $h`"
-		stat="on"
-		$SSH `cat $h/ADDR` true || stat="off"
-		echo "$host	`cat $h/ADDR`	$stat"
+		addr="`cat $h/ADDR`"
+		stat="NA"
+		if $SSH $addr true; then
+			stat="OK"
+			if test "$report" = "cpu"; then
+				load="`ssh $addr cat '/proc/loadavg' </dev/null | awk '{print \$1}'`"
+				temp="`ssh $addr cat '/sys/devices/platform/coretemp.?/hwmon/hwmon?/*input' </dev/null | sort -rn | head -n5 | tr '\n' ' '`"
+				stat="`printf '%5s	%s' $load \"$temp\"`"
+			elif test -n "$report"; then
+				stat="`ssh $addr $report </dev/null`"
+			fi
+		fi
+		echo "$host	$addr	$stat"
 	done
 }
 
