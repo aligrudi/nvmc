@@ -470,7 +470,7 @@ case "$1" in
 	user)
 		ncuser $* || exit $?
 		;;
-	stop|cont|quit|reboot|send|kill|poff|qlog)
+	stop|cont|quit|reboot|send|kill|poff|qlog|qmon)
 		ncvm $* || exit $?
 		;;
 	*)
@@ -501,5 +501,6 @@ case "$1" in
 		echo "  stop      stop the VM"
 		echo "  cont      continue the VM"
 		echo "  qlog      show qemu logs"
+		echo "  qmon      connect to qemu monitor"
 		;;
 esac

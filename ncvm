@@ -78,6 +78,10 @@ vmqlog() {
 	fi
 }
 
+vmqmon() {
+	test -S $sock && socat - $sock
+}
+
 vmsend() {
 	test -S $sock && socat -T1 - $sock | tail -n +2 | head -n -1
 }
@@ -105,6 +109,9 @@ case "$2" in
 		;;
 	qlog)
 		vmqlog $* || exit 1
+		;;
+	qmon)
+		vmqmon $* || exit 1
 		;;
 	send)
 		vmsend $* || exit 1
