@@ -443,11 +443,6 @@ case "$1" in
 			ncstat "$@" || exit $?
 		fi
 		;;
-	stat-json)
-		printf "[\n"
-		ncstat "$@" | awk '{ printf(" {\"slot\": \"%s\", \"name\": \"%s\", \"host\": \"%s\", \"stat\": \"%s\", \"access\": \"%s\"},\n", $1, $2, $4, $5, $6); }'
-		printf "]\n"
-		;;
 	push)
 		ncpush "$@" || exit $?
 		;;
@@ -459,11 +454,6 @@ case "$1" in
 		;;
 	ping)
 		ncping "$@" || exit $?
-		;;
-	ping-json)
-		printf "[\n"
-		ncping "$@" | awk '{ printf(" {\"host\": \"%s\", \"ip\": \"%s\", \"stat\": \"%s\", \"temp\": \"%s\"},\n", $1, $2, $3, $4); }'
-		printf "]\n"
 		;;
 	disk)
 		ncdisk "$@" || exit $?

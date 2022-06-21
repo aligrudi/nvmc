@@ -436,6 +436,18 @@ case "$1" in
 	dhcpconf)
 		xdhcpconf "$@" || exit $?
 		;;
+	stat-json)
+		shift
+		printf "[\n"
+		$NCDIR/nc stat "$@" | awk '{ printf(" {\"slot\": \"%s\", \"name\": \"%s\", \"host\": \"%s\", \"stat\": \"%s\", \"access\": \"%s\"},\n", $1, $2, $4, $5, $6); }'
+		printf "]\n"
+		;;
+	ping-json)
+		shift
+		printf "[\n"
+		$NCDIR/nc ping "$@" | awk '{ printf(" {\"host\": \"%s\", \"ip\": \"%s\", \"stat\": \"%s\", \"temp\": \"%s\"},\n", $1, $2, $3, $4); }'
+		printf "]\n"
+		;;
 	*)
 		echo "Usage: $0 command [options]"
 		echo
@@ -453,5 +465,7 @@ case "$1" in
 		echo "  backup    create a backup of /var/nc"
 		echo "  macs      print MAC-IP address mappings"
 		echo "  dhcpconf  generate dhcpd config"
+		echo "  stat-json print VM status in JSON format"
+		echo "  ping-json print host status in JSON format"
 		;;
 esac
