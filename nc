@@ -59,19 +59,19 @@ nckeysinit() {
 
 ncstat() {
 	shift 1
+	pat='*'
 	while test "$#" -ge 1; do
 		case "$1" in
 			-l)
 				loc="1"
 				;;
 			*)
-				echo "Usage: nc stat [-l]"
-				return 1
+				pat="$1"
 				;;
 		esac
 		shift
 	done
-	for vm in $VMDIR/*/; do
+	for vm in $VMDIR/$pat/; do
 		if test -f $vm/CPUS -a -f $vm/MEMS; then
 			vmname="`basename $vm`"
 			stat="-"
@@ -97,7 +97,7 @@ ncstat() {
 }
 
 ncstat_colour() {
-	ncstat $* | sed "/enabled/s/running/[32m&[0m/g; /disabled/s/^.*\$/[37m&[0m/; /disabled/s/\(running\|paused\)/[31m&[37m/; "
+	ncstat "$@" | sed "/enabled/s/running/[32m&[0m/g; /disabled/s/^.*\$/[37m&[0m/; /disabled/s/\(running\|paused\)/[31m&[37m/; "
 }
 
 nchost_used() {
