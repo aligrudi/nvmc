@@ -428,62 +428,62 @@ test "$#" -gt "0" && echo "`date '+%Y:%m:%d %T'`	$*" >>$NCDIR/nc.log
 # Main commands
 case "$1" in
 	host)
-		nchost $* || exit $?
+		nchost "$@" || exit $?
 		;;
 	hostinit)
-		nchostinit $* || exit $?
+		nchostinit "$@" || exit $?
 		;;
 	keysinit)
-		nckeysinit $* || exit $?
+		nckeysinit "$@" || exit $?
 		;;
 	stat|vm)
 		if test -t 1; then
-			ncstat_colour $* || exit $?
+			ncstat_colour "$@" || exit $?
 		else
-			ncstat $* || exit $?
+			ncstat "$@" || exit $?
 		fi
 		;;
 	push)
-		ncpush $* || exit $?
+		ncpush "$@" || exit $?
 		;;
 	vncs)
-		ncvncs $* || exit $?
+		ncvncs "$@" || exit $?
 		;;
 	sshs)
-		ncsshs $* || exit $?
+		ncsshs "$@" || exit $?
 		;;
 	ping)
-		ncping $* || exit $?
+		ncping "$@" || exit $?
 		;;
 	disk)
-		ncdisk $* || exit $?
+		ncdisk "$@" || exit $?
 		;;
 	size)
-		ncsize $* || exit $?
+		ncsize "$@" || exit $?
 		;;
 	exec)
-		ncexec $* || exit $?
+		ncexec "$@" || exit $?
 		;;
 	name)
-		ncname $* || exit $?
+		ncname "$@" || exit $?
 		;;
 	drop)
-		ncdrop $* || exit $?
+		ncdrop "$@" || exit $?
 		;;
 	save)
-		ncsave $* || exit $?
+		ncsave "$@" || exit $?
 		;;
 	slot)
-		ncslot $* || exit $?
+		ncslot "$@" || exit $?
 		;;
 	move)
-		ncmove $* || exit $?
+		ncmove "$@" || exit $?
 		;;
 	user)
-		ncuser $* || exit $?
+		ncuser "$@" || exit $?
 		;;
 	stop|cont|quit|reboot|send|kill|poff|qlog|qmon)
-		ncvm $* || exit $?
+		ncvm "$@" || exit $?
 		;;
 	*)
 		echo "Usage: $0 command [options]"
