@@ -19,7 +19,8 @@ The directory NCDIR/hosts/HOST stores the details of host node HOST:
 + ADDR: the address of the host.
 + CPUS: the number of available CPUs.
 + MEMS: available memory in GB.
-+ GPUS: the number of available GPUs.
++ DISK: available disk space in GB.
++ GPUS: each line contains Qemu options necessary for a GPU.
 
 The directory NCDIR/vms/VM stores the details of virtual machine VM:
 + CPUS: the number of CPUS assigned to VM.

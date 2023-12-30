@@ -17,7 +17,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 # Directories
-NCDIR="/var/nc"
+NCDIR="${NCDIR:-/var/nc}"
 VMDIR="$NCDIR/vms"
 HSDIR="$NCDIR/hosts"
 HSBIN="$NCDIR"
@@ -80,6 +80,7 @@ ncstat() {
 			disk="0"
 			cpus="`cat $vm/CPUS`"
 			mems="`cat $vm/MEMS`"
+			gpus="0"
 			link="enabled"
 			test -f $vm/USER && test "`cat $vm/USER`" -lt "0" && link="disabled"
 			test -f $vm/DISK && disk="`cat $vm/DISK`"
@@ -90,8 +91,9 @@ ncstat() {
 			test -f $vm/SAVE && stat="saved"
 			test -f $vm/HOST && host="`cat $vm/HOST`"
 			test -f $vm/SLOT && slot="`cat $vm/SLOT`"
-			printf "%03d  %-16s  %02d:%03d:%03d  %-8s  %-9s  %-8s\\n" \
-				"$slot" "`basename $vm`" "$cpus" "$mems" "$disk" "$host" "$stat" "$link"
+			test -f $vm/GPUS && gpus="`wc -w <$vm/GPUS`"
+			printf "%03d  %-16s  %02d:%03d:%03d:%d  %-8s  %-9s  %-8s\\n" \
+				"$slot" "`basename $vm`" "$cpus" "$mems" "$disk" "$gpus" "$host" "$stat" "$link"
 		fi
 	done
 }
@@ -110,6 +112,9 @@ nchost_used() {
 				if test -f "$vm/USER" && test "`cat $vm/USER`" -ge 0; then
 					if test -f "$vm/$type"; then
 						cur="`cat $vm/$type`"
+						if test "$type" == "GPUS"; then
+							cur="`wc -w <$vm/$type`"
+						fi
 						cnt="`expr $cnt + $cur`"
 					fi
 				fi
@@ -128,7 +133,7 @@ nchoststat() {
 	disk=`nchost_used $host DISK`
 	hostgpus="0"
 	hostdisk="0"
-	test -f "$h/GPUS" && hostgpus="`cat $h/GPUS`"
+	test -f "$h/GPUS" && hostgpus="`wc -l <$h/GPUS`"
 	test -f "$h/DISK" && hostdisk="`cat $h/DISK`"
 	echo "$host	`cat $h/ADDR`	$cpus/`cat $h/CPUS`	$mems/`cat $h/MEMS`	$gpus/$hostgpus	$disk/$hostdisk"
 }
