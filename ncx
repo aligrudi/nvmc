@@ -171,7 +171,7 @@ xmkvm() {
 	if test -z "$cln" -o "$cln" = "c"; then
 		echo "cp $IMDIR/$img disk" >>$vm/INIT
 	else
-		echo "qemu-img create -f qcow2 -b $IMDIR/$img disk" >>$vm/INIT
+		echo "qemu-img create -f qcow2 -b $IMDIR/$img -F qcow2 disk" >>$vm/INIT
 	fi
 	chmod +x $vm/INIT
 	if test -n "$disk"; then
